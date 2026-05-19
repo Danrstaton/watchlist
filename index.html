@@ -126,16 +126,34 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 @keyframes spin{to{transform:rotate(360deg)}}
 .tv-sp{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
 .tv-sp-title{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
-.tv-sp-row{align-items:center;display:flex;justify-content:space-between;margin-bottom:10px}
-.tv-sp-label{color:var(--text);font-size:13px}
-.stepper{align-items:center;display:flex;gap:10px}
-.stepper-btn{background:rgba(255,255,255,.1);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:18px;line-height:1;padding:2px 12px;-webkit-tap-highlight-color:transparent}
-.stepper-btn:active{opacity:.7}
-.stepper-val{color:var(--accent);font-size:13px;font-weight:600;min-width:72px;text-align:center}
-.tv-sp-toggle{align-items:center;cursor:pointer;display:flex;gap:10px;padding:4px 0;-webkit-tap-highlight-color:transparent}
-.tv-sp-check{font-size:16px;transition:color .2s;color:var(--text2)}
-.tv-sp-check.on{color:var(--green)}
-.tv-sp-upcoming{display:flex;gap:8px;margin-top:10px}
+.tv-sp-upcoming{display:flex;gap:8px}
+/* Epic detail modal */
+.dm-hero-wrap{border-radius:20px 20px 0 0;margin:-20px -20px 0;overflow:hidden;position:relative}
+@media(min-width:500px){.dm-hero-wrap{border-radius:16px 16px 0 0}}
+.dm-hero-img{display:block;height:300px;object-fit:cover;width:100%}
+.dm-hero-ph{align-items:center;background:var(--card2);display:flex;font-size:72px;height:220px;justify-content:center}
+.dm-hero-scrim{background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 30%,rgba(24,24,42,.98) 85%);inset:0;position:absolute}
+.dm-hero-drag{background:rgba(255,255,255,.35);border-radius:2px;height:4px;left:50%;position:absolute;top:10px;transform:translateX(-50%);width:36px}
+.dm-hero-info{bottom:14px;left:16px;position:absolute;right:16px}
+.dm-hero-title{font-size:21px;font-weight:800;line-height:1.2;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.9)}
+.dm-hero-meta{align-items:center;display:flex;flex-wrap:wrap;gap:5px}
+.dm-content{padding:14px 20px 20px}
+/* Season checkboxes */
+.season-label{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
+.season-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.season-cb{align-items:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;display:flex;font-size:13px;font-weight:600;gap:4px;padding:8px 13px;-webkit-tap-highlight-color:transparent;transition:all .2s}
+.season-cb.on{background:rgba(26,156,91,.2);border-color:var(--green);color:var(--green)}
+.season-cb-all{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-size:12px;font-weight:600;margin-bottom:8px;padding:8px 12px;text-align:left;-webkit-tap-highlight-color:transparent;width:100%;transition:all .2s}
+.season-cb-all.on{background:rgba(26,156,91,.12);border-color:var(--green);color:var(--green)}
+.nsz-toggle{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-bottom:14px;padding:11px 13px;-webkit-tap-highlight-color:transparent;transition:border-color .2s}
+.nsz-toggle.on{border-color:var(--green)}
+.nsz-check{color:var(--text2);font-size:16px;flex-shrink:0;transition:color .2s}
+.nsz-check.on{color:var(--green)}
+.nsz-text{flex:1}
+.nsz-label{color:var(--text);font-size:13px;font-weight:600}
+.nsz-date{color:var(--text2);font-size:11px;margin-top:2px}
+.move-btn{background:rgba(229,178,93,.1);border:1px solid var(--accent);border-radius:8px;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;padding:11px 8px;flex:1;text-align:center;-webkit-tap-highlight-color:transparent;transition:background .2s}
+.move-btn:hover{background:rgba(229,178,93,.2)}
 </style>
 </head>
 <body>
@@ -176,6 +194,8 @@ const mk=(type,cat,title,svc=[],sNote='')=>({
   userDate:'',note:'',tmdbFetched:false,tvDetailsFetched:false,
   poster:null,description:'',tmdbDate:'',tmdbId:null,showKey:null,
   seasonNote:'',yearRange:'',inTheaters:false,autoCreated:false,
+  totalSeasons:null,watchedSeasons:[],
+  newSeasonAnnounced:false,newSeasonDate:'',firstAirDate:'',
 });
 
 const DATA=[
@@ -315,46 +335,40 @@ async function fetchTVDetails(tmdbId){
     const d=await r.json();
     const next=d.next_episode_to_air;
     const last=d.last_episode_to_air;
-    // Only flag as "new upcoming season" if next ep is a genuinely new season
     const isNewSeason=next&&last&&next.season_number>last.season_number;
     return{
       currentSeason:last?{date:last.air_date,season:last.season_number}:null,
       upcomingSeason:isNewSeason?{date:next.air_date,season:next.season_number}:null,
       totalSeasons:d.number_of_seasons||1,
+      releasedSeasons:last?last.season_number:(d.number_of_seasons||1),
       firstAirDate:d.first_air_date||'',
     };
   }catch{return null;}
 }
 
-// Apply TV detail updates to an item based on its category
-function applyTVDets(item,dets,overrideStreaming){
+function buildTVDisplay(dets,cat){
+  // Returns {seasonNote,yearRange,totalSeasons,firstAirDate,tmdbDate}
+  const{currentSeason:cur,upcomingSeason:upc,totalSeasons,releasedSeasons,firstAirDate:fa}=dets;
+  const startYear=(fa||'').slice(0,4);
+  const endYear=cur?.date?.slice(0,4)||startYear;
+  const yr=startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear;
+  if(cat==='rewatch'){
+    const n=totalSeasons||1;
+    return{seasonNote:n>1?`Season 1–${n}`:'Season 1',yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
+  }
+  if(cat==='released'){
+    const n=releasedSeasons||totalSeasons||null;
+    return{seasonNote:n>1?`Season 1–${n}`:(n===1?'Season 1':''),yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
+  }
+  // comingSoon (Ongoing)
+  return{totalSeasons:releasedSeasons||totalSeasons||null,firstAirDate:fa||'',tmdbDate:cur?.date||'',newSeasonDate:upc?.date||''};
+}
+
+function applyTVDets(item,dets){
   if(!dets)return{tvDetailsFetched:true};
-  const{currentSeason:cur,upcomingSeason:upc,totalSeasons,firstAirDate}=dets;
   const sk=item.tmdbId?showKey(item.tmdbId):null;
-  if(item.category==='rewatch'){
-    const startYear=firstAirDate?.slice(0,4)||'';
-    const endYear=cur?.date?.slice(0,4)||startYear;
-    return{
-      tvDetailsFetched:true,showKey:sk,
-      ...(cur?{tmdbDate:cur.date}:{}),
-      seasonNote:totalSeasons>1?`Season 1–${totalSeasons}`:`Season ${totalSeasons}`,
-      yearRange:startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear,
-    };
-  }
-  if(item.category==='comingSoon'){
-    const ep=upc||cur;
-    return{
-      tvDetailsFetched:true,showKey:sk,
-      ...(ep?{tmdbDate:ep.date,seasonNote:`Season ${ep.season}`}:{}),
-      _companionCat:'released',_companionEp:cur,
-    };
-  }
-  // released
-  return{
-    tvDetailsFetched:true,showKey:sk,
-    ...(cur?{tmdbDate:cur.date,seasonNote:`Season ${cur.season}`}:{}),
-    _companionCat:'comingSoon',_companionEp:upc,
-  };
+  const built=buildTVDisplay(dets,item.category);
+  return{tvDetailsFetched:true,showKey:sk,...built};
 }
 
 async function fetchItem(item){
@@ -427,6 +441,7 @@ function formatDate(item){
   const d=parseDate(item.tmdbDate)||parseDate(item.userDate);
   if(!d){
     if(item.userDate&&/^\d{4}$/.test(item.userDate.trim()))return item.userDate.trim();
+    if(item.category==='comingSoon')return'TBD';
     return'';
   }
   if(item.category==='comingSoon'||item.inTheaters)
@@ -462,7 +477,26 @@ function Badge({svc,note}){
 }
 
 function Card({item,onTap}){
-  const date=formatDate(item);
+  const isOngoing=item.type==='tv'&&item.category==='comingSoon';
+
+  // Season / status line
+  let seasonLine='';
+  if(isOngoing){
+    if(item.newSeasonAnnounced){
+      const d=item.newSeasonDate?parseDate(item.newSeasonDate):null;
+      const ds=d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+      seasonLine=`New season coming${ds?` · ${ds}`:''}`;
+    }else{
+      const w=item.watchedSeasons?.length||0,t=item.totalSeasons||0;
+      seasonLine=t>0?(w>0?`${w}/${t} seasons watched`:`${t} seasons`):'';
+    }
+  }else{
+    seasonLine=item.seasonNote||'';
+  }
+
+  // Date line — hide for Ongoing (info already in seasonLine)
+  const dateStr=isOngoing?'':formatDate(item);
+
   return(
     <div className="card" onClick={()=>onTap(item)}>
       <div className="poster">
@@ -474,8 +508,8 @@ function Card({item,onTap}){
       </div>
       <div className="cbody">
         <div className="ctitle">{item.title}</div>
-        {item.seasonNote&&<div className="cseason">{item.seasonNote}</div>}
-        {date&&<div className="cdate">{date}</div>}
+        {seasonLine&&<div className="cseason">{seasonLine}</div>}
+        {dateStr&&<div className="cdate">{dateStr}</div>}
         {item.streaming&&item.streaming.length>0&&(
           <div className="badges">
             {item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
@@ -487,33 +521,161 @@ function Card({item,onTap}){
   );
 }
 
-function DetailModal({item,onClose,onWatched,onRemove}){
-  const date=formatDate(item);
-  const canWatch=item.category!=='comingSoon';
+function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
+  const[watched,setWatched]=React.useState(new Set(item.watchedSeasons||[]));
+  const[newSznOn,setNewSznOn]=React.useState(item.newSeasonAnnounced||false);
+  const[newSznDate,setNewSznDate]=React.useState(item.newSeasonDate||'');
+  const[moving,setMoving]=React.useState(false);
+  const[sznFetching,setSznFetching]=React.useState(false);
+
+  const isTV=item.type==='tv';
+  const isStart=isTV&&item.category==='released';
+  const isOngoing=isTV&&item.category==='comingSoon';
+  const isMovie=item.type==='movie';
+
+  // Hero meta line
+  let heroSub='';
+  if(isOngoing){
+    if(newSznOn){
+      const d=newSznDate?parseDate(newSznDate):null;
+      const ds=d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+      heroSub=`New season coming${ds?` · ${ds}`:''}`;
+    }else{
+      const w=watched.size,t=item.totalSeasons||0;
+      heroSub=t>0?(w>0?`${w}/${t} seasons watched`:`${t} seasons`):'';
+    }
+  }else{
+    heroSub=item.seasonNote||'';
+  }
+  const showDate=!isOngoing;
+  const date=showDate?formatDate(item):'';
+
+  const toggleSeason=s=>{
+    setWatched(prev=>{
+      const n=new Set(prev);n.has(s)?n.delete(s):n.add(s);
+      onUpdateItem(item.id,{watchedSeasons:Array.from(n)});
+      return n;
+    });
+  };
+  const toggleAll=()=>{
+    const n=watched.size===item.totalSeasons?new Set():new Set(Array.from({length:item.totalSeasons},(_,i)=>i+1));
+    setWatched(n);onUpdateItem(item.id,{watchedSeasons:Array.from(n)});
+  };
+
+  const handleNewSzn=async checked=>{
+    setNewSznOn(checked);
+    if(checked){
+      let d=item.newSeasonDate||'';
+      if(!d&&item.tmdbId){
+        setSznFetching(true);
+        const dets=await fetchTVDetails(item.tmdbId);
+        d=dets?.upcomingSeason?.date||'';
+        setSznFetching(false);
+      }
+      setNewSznDate(d);
+      onUpdateItem(item.id,{newSeasonAnnounced:true,newSeasonDate:d});
+    }else{
+      onUpdateItem(item.id,{newSeasonAnnounced:false});
+    }
+  };
+
+  const handleMoveToOngoing=async()=>{
+    setMoving(true);
+    const upd={category:'comingSoon',watchedSeasons:item.watchedSeasons||[]};
+    if(item.tmdbId){
+      const dets=await fetchTVDetails(item.tmdbId);
+      if(dets){
+        Object.assign(upd,{
+          totalSeasons:dets.releasedSeasons||dets.totalSeasons||null,
+          newSeasonDate:dets.upcomingSeason?.date||'',
+          tmdbDate:dets.currentSeason?.date||item.tmdbDate,
+          firstAirDate:dets.firstAirDate||item.firstAirDate||'',
+          tvDetailsFetched:true,
+        });
+      }
+    }
+    onUpdateItem(item.id,upd);setMoving(false);onClose();
+  };
+
+  const handleMoveToRewatch=async()=>{
+    setMoving(true);
+    const upd={category:'rewatch',newSeasonAnnounced:false,newSeasonDate:'',watchedSeasons:[]};
+    if(item.tmdbId){
+      const dets=await fetchTVDetails(item.tmdbId);
+      if(dets) Object.assign(upd,{tvDetailsFetched:true,...buildTVDisplay(dets,'rewatch')});
+    }
+    onUpdateItem(item.id,upd);setMoving(false);onClose();
+  };
+
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal">
-        <div className="dm-drag"/>
-        <div className="dm-hero">
-          {item.poster
-            ?<img className="dm-poster" src={item.poster} alt={item.title}/>
-            :<div className="dm-poster-ph">🍿</div>
-          }
-          <div className="dm-info">
-            <div className="dm-title">{item.title}</div>
-            {item.seasonNote&&<div className="dm-season">{item.seasonNote}</div>}
-            {date&&<div className="dm-date">{date}</div>}
-            <div className="dm-badges">
+      <div className="modal" style={{padding:0}}>
+        <div className="dm-hero-wrap">
+          {item.poster?<img className="dm-hero-img" src={item.poster} alt={item.title}/>:<div className="dm-hero-ph">🍿</div>}
+          <div className="dm-hero-scrim"/>
+          <div className="dm-hero-drag"/>
+          <div className="dm-hero-info">
+            <div className="dm-hero-title">{item.title}</div>
+            <div className="dm-hero-meta">
+              {heroSub&&<span style={{color:'rgba(255,255,255,.8)',fontSize:12}}>{heroSub}</span>}
+              {date&&<span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>{date}</span>}
               {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
               {item.streaming&&item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
             </div>
           </div>
         </div>
-        {item.description&&<div className="dm-desc">{item.description}</div>}
-        <div className="dm-actions">
-          <button className="btn" onClick={onClose}>Close</button>
-          <button className="btn btn-danger" onClick={()=>{onRemove(item.id);onClose();}}>Remove</button>
-          {canWatch&&<button className="btn btn-watched" onClick={()=>{onWatched(item.id);onClose();}}>✓ Watched</button>}
+        <div className="dm-content">
+          {item.description&&<p className="dm-desc">{item.description}</p>}
+
+          {isOngoing&&item.totalSeasons>0&&(
+            <div>
+              <div className="season-label">Seasons watched</div>
+              <button className={`season-cb-all${watched.size===item.totalSeasons?' on':''}`} onClick={toggleAll}>
+                {watched.size===item.totalSeasons?'✓ All seasons':'Select all seasons'}
+              </button>
+              <div className="season-grid">
+                {Array.from({length:item.totalSeasons},(_,i)=>i+1).map(s=>(
+                  <button key={s} className={`season-cb${watched.has(s)?' on':''}`} onClick={()=>toggleSeason(s)}>
+                    {watched.has(s)?'✓ ':''} S{s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isOngoing&&(
+            <div className={`nsz-toggle${newSznOn?' on':''}`} onClick={()=>!sznFetching&&handleNewSzn(!newSznOn)}>
+              <span className={`nsz-check${newSznOn?' on':''}`}>
+                {sznFetching?<span className="spinner"/>:(newSznOn?'✓':'○')}
+              </span>
+              <div className="nsz-text">
+                <div className="nsz-label">New season announced</div>
+                {newSznOn&&newSznDate&&(
+                  <div className="nsz-date">
+                    {parseDate(newSznDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||newSznDate}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="dm-actions">
+            <button className="btn" onClick={onClose}>Close</button>
+            <button className="btn btn-danger" onClick={()=>{onRemove(item.id);onClose();}}>Remove</button>
+            {isStart&&(
+              <button className="move-btn" onClick={handleMoveToOngoing} disabled={moving}>
+                {moving?<span className="spinner"/>:'Move to Ongoing →'}
+              </button>
+            )}
+            {isOngoing&&(
+              <button className="move-btn" onClick={handleMoveToRewatch} disabled={moving}>
+                {moving?<span className="spinner"/>:'Move to Rewatch →'}
+              </button>
+            )}
+            {isMovie&&item.category!=='comingSoon'&&(
+              <button className="btn btn-watched" onClick={()=>{onWatched(item.id);onClose();}}>✓ Watched</button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -523,142 +685,128 @@ function DetailModal({item,onClose,onWatched,onRemove}){
 function AddModal({onClose,onAdd}){
   const[q,setQ]=useState('');
   const[mtype,setMtype]=useState('movie');
-  const[intent,setIntent]=useState('watch');
+  const[movieIntent,setMovieIntent]=useState('watch');
+  const[tvCat,setTvCat]=useState('released'); // released=Start, comingSoon=Ongoing, rewatch
   const[results,setResults]=useState([]);
   const[sel,setSel]=useState(null);
   const[loading,setLoading]=useState(false);
   const[adding,setAdding]=useState(false);
   const[svc,setSvc]=useState('');
   const[sNote,setSNote]=useState('');
-  // TV season state
   const[tvDets,setTvDets]=useState(null);
   const[tvFetching,setTvFetching]=useState(false);
-  const[manualSeason,setManualSeason]=useState(1);
-  const[trackUpcoming,setTrackUpcoming]=useState(false);
-  const[upcomingSeasNum,setUpcomingSeasNum]=useState('');
-  const[upcomingYr,setUpcomingYr]=useState('');
+  const[tvSeasons,setTvSeasons]=useState(0);
+  const[watchedSeasons,setWatchedSeasons]=useState(new Set());
+  const[newSznOn,setNewSznOn]=useState(false);
+  const[newSznDate,setNewSznDate]=useState('');
   const ref=useRef(null);
   useEffect(()=>{ref.current?.focus();},[]);
 
-  const resetTV=()=>{setTvDets(null);setTvFetching(false);setManualSeason(1);setTrackUpcoming(false);setUpcomingSeasNum('');setUpcomingYr('');};
+  const resetTV=()=>{setTvDets(null);setTvFetching(false);setTvSeasons(0);setWatchedSeasons(new Set());setNewSznOn(false);setNewSznDate('');};
 
   const selectResult=async r=>{
     setSel(r);
-    if(mtype==='tv'&&intent==='watch'&&r.tmdbId){
-      setTvFetching(true);setTvDets(null);
-      const dets=await fetchTVDetails(r.tmdbId);
-      setTvDets(dets);
-      if(dets){
-        const cur=dets.currentSeason?.season||1;
-        setManualSeason(cur);
-        if(dets.upcomingSeason){
-          setTrackUpcoming(true);
-          setUpcomingSeasNum(String(dets.upcomingSeason.season));
-          setUpcomingYr(dets.upcomingSeason.date?.slice(0,4)||'');
-        }else{
-          setTrackUpcoming(false);
-          setUpcomingSeasNum(String(cur+1));
-          setUpcomingYr('');
-        }
-      }
-      setTvFetching(false);
+    if(mtype!=='tv'||tvCat!=='comingSoon'||!r.tmdbId)return;
+    setTvFetching(true);setTvDets(null);
+    const dets=await fetchTVDetails(r.tmdbId);
+    setTvDets(dets);
+    if(dets){
+      setTvSeasons(dets.releasedSeasons||dets.totalSeasons||0);
+      if(dets.upcomingSeason){setNewSznOn(true);setNewSznDate(dets.upcomingSeason.date||'');}
     }
+    setTvFetching(false);
   };
 
   const doSearch=async()=>{
     if(!q.trim())return;
     setLoading(true);setSel(null);resetTV();
     const r=await tmdbSearch(q,mtype);
-    const sorted=intent==='watch'&&mtype==='movie'
-      ?[...r].sort((a,b)=>{
-          const af=a.date&&a.date>=TODAY()?1:0;
-          const bf=b.date&&b.date>=TODAY()?1:0;
-          return bf-af;
-        })
+    const sorted=mtype==='movie'&&movieIntent==='watch'
+      ?[...r].sort((a,b)=>{const af=a.date&&a.date>=TODAY()?1:0,bf=b.date&&b.date>=TODAY()?1:0;return bf-af;})
       :r;
     setResults(sorted);setLoading(false);
   };
 
+  const toggleSeason=s=>setWatchedSeasons(p=>{const n=new Set(p);n.has(s)?n.delete(s):n.add(s);return n;});
+  const toggleAll=()=>setWatchedSeasons(p=>p.size===tvSeasons?new Set():new Set(Array.from({length:tvSeasons},(_,i)=>i+1)));
+
   const handleAdd=async()=>{
     if(!sel&&!q.trim())return;
     setAdding(true);
-    const isRewatch=intent==='rewatch';
     const title=sel?sel.title:q.trim();
-
     let streaming=svc?[svc]:[];
-    if(!streaming.length&&sel?.tmdbId){
-      const pvs=await getProviders(sel.tmdbId,mtype);
-      if(pvs.length)streaming=pvs;
-    }
-
+    if(!streaming.length&&sel?.tmdbId){const pvs=await getProviders(sel.tmdbId,mtype);if(pvs.length)streaming=pvs;}
     const base={
-      streaming,streamingNote:sNote,userDate:'',note:'',
-      tmdbFetched:!!sel,tvDetailsFetched:false,
-      poster:sel?.poster||null,description:sel?.description||'',
-      tmdbDate:sel?.date||'',tmdbId:sel?.tmdbId||null,
+      streaming,streamingNote:sNote,userDate:'',note:'',tmdbFetched:!!sel,tvDetailsFetched:false,
+      poster:sel?.poster||null,description:sel?.description||'',tmdbDate:sel?.date||'',tmdbId:sel?.tmdbId||null,
       showKey:null,seasonNote:'',yearRange:'',inTheaters:false,autoCreated:false,
+      totalSeasons:null,watchedSeasons:[],newSeasonAnnounced:false,newSeasonDate:'',firstAirDate:'',
     };
 
-    if(isRewatch){
-      let seasonNote='',yearRange='';
-      if(mtype==='tv'&&sel?.tmdbId){
-        const dets=tvDets||(await fetchTVDetails(sel.tmdbId));
-        if(dets){
-          const cur=dets.currentSeason;
-          const startYear=dets.firstAirDate?.slice(0,4)||'';
-          const endYear=cur?.date?.slice(0,4)||startYear;
-          seasonNote=dets.totalSeasons>1?`Season 1–${dets.totalSeasons}`:`Season ${dets.totalSeasons}`;
-          yearRange=startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear;
-          if(cur)base.tmdbDate=cur.date;
-          base.showKey=sel.tmdbId?showKey(sel.tmdbId):null;
-        }
+    if(mtype==='movie'){
+      if(movieIntent==='rewatch'){
+        onAdd({...base,id:uid(),type:'movie',category:'rewatch',title});
+      }else{
+        const cat=sel?.date&&sel.date>=TODAY()?'comingSoon':'released';
+        onAdd({...base,id:uid(),type:'movie',category:cat,title});
       }
-      onAdd({...base,id:uid(),type:mtype,category:'rewatch',title,seasonNote,yearRange,tvDetailsFetched:mtype==='tv'});
-    }else if(mtype==='movie'){
-      const cat=sel?.date&&sel.date>=TODAY()?'comingSoon':'released';
-      onAdd({...base,id:uid(),type:'movie',category:cat,title});
     }else{
-      // TV watch — use manualSeason + optional upcoming from panel
       const sk=sel?.tmdbId?showKey(sel.tmdbId):null;
-      const relDate=tvDets?.currentSeason?.date||sel?.date||'';
-      onAdd({...base,id:uid(),type:'tv',category:'released',title,
-        tmdbDate:relDate,seasonNote:`Season ${manualSeason}`,
-        showKey:sk,tvDetailsFetched:true});
-      if(trackUpcoming&&upcomingSeasNum){
-        const seasNum=parseInt(upcomingSeasNum)||(manualSeason+1);
-        const yrStr=upcomingYr.trim();
-        const tmdbUpDate=tvDets?.upcomingSeason?.date||'';
+      if(tvCat==='comingSoon'){
+        // Ongoing — data already fetched in selectResult
         onAdd({...base,id:uid(),type:'tv',category:'comingSoon',title,
-          tmdbDate:tmdbUpDate,
-          userDate:!tmdbUpDate&&yrStr?yrStr:'',
-          seasonNote:`Season ${seasNum}`,
-          showKey:sk,streaming:[],autoCreated:false,tvDetailsFetched:true});
+          showKey:sk,tvDetailsFetched:!!tvDets,
+          totalSeasons:tvSeasons||null,
+          watchedSeasons:Array.from(watchedSeasons),
+          tmdbDate:tvDets?.currentSeason?.date||sel?.date||'',
+          firstAirDate:tvDets?.firstAirDate||'',
+          newSeasonAnnounced:newSznOn,
+          newSeasonDate:newSznOn?(newSznDate||''):'',
+        });
+      }else{
+        // Start or Rewatch — fetch details now
+        let tvUpd={};
+        if(sel?.tmdbId){
+          const dets=await fetchTVDetails(sel.tmdbId);
+          if(dets) tvUpd=buildTVDisplay(dets,tvCat==='rewatch'?'rewatch':'released');
+        }
+        onAdd({...base,id:uid(),type:'tv',
+          category:tvCat==='rewatch'?'rewatch':'released',
+          title,showKey:sk,tvDetailsFetched:true,...tvUpd});
       }
     }
     setAdding(false);onClose();
   };
 
-  const showTVPanel=mtype==='tv'&&intent==='watch'&&!!sel;
+  const isTV=mtype==='tv';
+  const isOngoing=isTV&&tvCat==='comingSoon';
 
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal">
         <div className="dm-drag"/>
         <div className="modal-title">Add to Watchlist</div>
-        <div className="row2">
-          <select className="msel" value={mtype} onChange={e=>{setMtype(e.target.value);setResults([]);setSel(null);resetTV();}}>
-            <option value="movie">Movie</option>
-            <option value="tv">TV Show</option>
-          </select>
-        </div>
+
+        {/* Movie / TV segmented */}
         <div className="intent-toggle" style={{marginBottom:12}}>
-          <button className={`intent-btn${intent==='watch'?' on':''}`} onClick={()=>{setIntent('watch');resetTV();}}>
-            Want to Watch
-          </button>
-          <button className={`intent-btn${intent==='rewatch'?' on':''}`} onClick={()=>{setIntent('rewatch');resetTV();}}>
-            Rewatch
-          </button>
+          <button className={`intent-btn${mtype==='movie'?' on':''}`} onClick={()=>{setMtype('movie');setResults([]);setSel(null);resetTV();}}>🎬 Movie</button>
+          <button className={`intent-btn${mtype==='tv'?' on':''}`} onClick={()=>{setMtype('tv');setResults([]);setSel(null);resetTV();}}>📺 TV Show</button>
         </div>
+
+        {/* Category */}
+        {isTV?(
+          <div className="intent-toggle" style={{marginBottom:12}}>
+            {[['released','Start'],['comingSoon','Ongoing'],['rewatch','Rewatch']].map(([k,l])=>(
+              <button key={k} className={`intent-btn${tvCat===k?' on':''}`} onClick={()=>{setTvCat(k);setSel(null);resetTV();}}>{l}</button>
+            ))}
+          </div>
+        ):(
+          <div className="intent-toggle" style={{marginBottom:12}}>
+            <button className={`intent-btn${movieIntent==='watch'?' on':''}`} onClick={()=>setMovieIntent('watch')}>Want to Watch</button>
+            <button className={`intent-btn${movieIntent==='rewatch'?' on':''}`} onClick={()=>setMovieIntent('rewatch')}>Rewatch</button>
+          </div>
+        )}
+
         <div className="row2" style={{marginBottom:12}}>
           <input ref={ref} className="minput" style={{marginBottom:0,flex:1}} placeholder="Search title…"
             value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&doSearch()}/>
@@ -666,14 +814,12 @@ function AddModal({onClose,onAdd}){
             {loading?<span className="spinner"/>:'Search'}
           </button>
         </div>
+
         {results.length>0&&(
           <div className="results">
             {results.map(r=>(
               <div key={r.tmdbId} className={`ritem${sel?.tmdbId===r.tmdbId?' sel':''}`} onClick={()=>selectResult(r)}>
-                {r.poster
-                  ?<img className="rposter" src={r.poster} alt={r.title}/>
-                  :<div className="rposter" style={{display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',height:72}}>?</div>
-                }
+                {r.poster?<img className="rposter" src={r.poster} alt={r.title}/>:<div className="rposter" style={{display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',height:72}}>?</div>}
                 <div className="rinfo">
                   <div className="rtitle">{r.title}</div>
                   {r.year&&<div className="ryear">{r.year}</div>}
@@ -683,41 +829,39 @@ function AddModal({onClose,onAdd}){
             ))}
           </div>
         )}
-        {showTVPanel&&(
+
+        {/* Ongoing panel */}
+        {isOngoing&&sel&&(
           <div className="tv-sp">
-            <div className="tv-sp-title">Season setup</div>
+            <div className="tv-sp-title">Seasons watched</div>
             {tvFetching?(
-              <div style={{color:'var(--text2)',fontSize:13,display:'flex',alignItems:'center',gap:8}}>
-                Loading season info <span className="spinner"/>
-              </div>
-            ):(
+              <div style={{color:'var(--text2)',fontSize:13,display:'flex',alignItems:'center',gap:8}}>Loading season info <span className="spinner"/></div>
+            ):tvSeasons>0?(
               <>
-                <div className="tv-sp-row">
-                  <span className="tv-sp-label">Released season</span>
-                  <div className="stepper">
-                    <button className="stepper-btn" onClick={()=>setManualSeason(s=>Math.max(1,s-1))}>−</button>
-                    <span className="stepper-val">Season {manualSeason}</span>
-                    <button className="stepper-btn" onClick={()=>setManualSeason(s=>s+1)}>+</button>
-                  </div>
+                <button className={`season-cb-all${watchedSeasons.size===tvSeasons?' on':''}`} onClick={toggleAll}>
+                  {watchedSeasons.size===tvSeasons?'✓ All seasons':'Select all'}
+                </button>
+                <div className="season-grid">
+                  {Array.from({length:tvSeasons},(_,i)=>i+1).map(s=>(
+                    <button key={s} className={`season-cb${watchedSeasons.has(s)?' on':''}`} onClick={()=>toggleSeason(s)}>
+                      {watchedSeasons.has(s)?'✓ ':''} S{s}
+                    </button>
+                  ))}
                 </div>
-                <div className="tv-sp-toggle" onClick={()=>setTrackUpcoming(v=>!v)}>
-                  <span className={`tv-sp-check${trackUpcoming?' on':''}`}>{trackUpcoming?'✓':'○'}</span>
-                  <span className="tv-sp-label">Track upcoming season</span>
-                </div>
-                {trackUpcoming&&(
-                  <div className="tv-sp-upcoming">
-                    <input className="minput" style={{marginBottom:0,width:90}} type="number"
-                      placeholder="Season #" value={upcomingSeasNum}
-                      onChange={e=>setUpcomingSeasNum(e.target.value)}/>
-                    <input className="minput" style={{marginBottom:0,flex:1}}
-                      placeholder="Expected year (e.g. 2027)" value={upcomingYr}
-                      onChange={e=>setUpcomingYr(e.target.value)}/>
-                  </div>
-                )}
               </>
+            ):(
+              <div style={{color:'var(--text2)',fontSize:13}}>No season info found</div>
             )}
+            <div className={`nsz-toggle${newSznOn?' on':''}`} style={{marginBottom:0}} onClick={()=>setNewSznOn(v=>!v)}>
+              <span className={`nsz-check${newSznOn?' on':''}`}>{newSznOn?'✓':'○'}</span>
+              <div className="nsz-text">
+                <div className="nsz-label">New season announced</div>
+                {newSznOn&&newSznDate&&<div className="nsz-date">{parseDate(newSznDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||newSznDate}</div>}
+              </div>
+            </div>
           </div>
         )}
+
         <input className="minput" placeholder="Streaming service (optional — auto-detected)" value={svc} onChange={e=>setSvc(e.target.value)}/>
         <input className="minput" style={{marginBottom:0}} placeholder="Price note (e.g. $5.99)" value={sNote} onChange={e=>setSNote(e.target.value)}/>
         <div className="mactions">
@@ -741,8 +885,7 @@ function App(){
     return autoMove(DATA);
   });
   const[tab,setTab]=useState('movie');
-  const[section,setSection]=useState('released');
-  const[q,setQ]=useState('');
+  const[section,setSection]=useState('comingSoon');
   const[showAdd,setShowAdd]=useState(false);
   const[detail,setDetail]=useState(null);
   const[done,setDone]=useState(0);
@@ -764,16 +907,8 @@ function App(){
       setItems(prev=>{
         const idx=prev.findIndex(x=>x.id===id);
         if(idx===-1)return prev;
-        const{_companionCat,_companionEp,...clean}=upd;
         const next=[...prev];
-        next[idx]={...next[idx],...clean};
-        // Create companion card if needed and not already present
-        if(_companionCat&&_companionEp){
-          const sk=next[idx].showKey;
-          if(sk&&!prev.some(x=>x.showKey===sk&&x.category===_companionCat)){
-            next.push(makeCompanion(next[idx],_companionCat,_companionEp));
-          }
-        }
+        next[idx]={...next[idx],...upd};
         return next;
       });
     };
@@ -800,6 +935,11 @@ function App(){
     setDetail(null);
   },[]);
 
+  const updateItem=useCallback((id,upd)=>{
+    setItems(p=>p.map(i=>i.id===id?{...i,...upd}:i));
+    setDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);
+  },[]);
+
   const addItem=useCallback(item=>setItems(p=>[...p,item]),[]);
 
   const exportJSON=()=>{
@@ -820,19 +960,15 @@ function App(){
     return{movie:{total:mv.length,...sc(mv)},tv:{total:tv.length,...sc(tv)}};
   },[items]);
 
-  const visible=useMemo(()=>{
-    let arr=items.filter(i=>i.type===tab&&i.category===section);
-    if(q)arr=arr.filter(i=>i.title.toLowerCase().includes(q.toLowerCase()));
-    return sortedItems(arr,section);
-  },[items,tab,section,q]);
+  const visible=useMemo(()=>sortedItems(items.filter(i=>i.type===tab&&i.category===section),section),[items,tab,section]);
+
+  const switchTab=t=>{setTab(t);setSection(t==='movie'?'comingSoon':'released');};
 
   const pct=total>0?(done/total)*100:100;
   const tc=counts[tab];
-  const SECTIONS=[
-    ['released','Released',tc.released],
-    ['comingSoon','Coming Soon',tc.comingSoon],
-    ['rewatch','Rewatch',tc.rewatch],
-  ];
+  const SECTIONS=tab==='movie'
+    ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch]]
+    :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch]];
 
   return(
     <>
@@ -842,7 +978,6 @@ function App(){
             🍿 Watchlist
             <small>{items.length} titles{fetching?` · ${done}/${total}`:''}</small>
           </div>
-          <input className="search" placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)}/>
           <div className="hdr-btns">
             <button className="btn" onClick={exportJSON}>⬇ JSON</button>
             <button className="btn btn-gold" onClick={()=>setShowAdd(true)}>＋ Add</button>
@@ -855,10 +990,10 @@ function App(){
           </div>
         )}
         <div className="tabs">
-          <button className={`tab${tab==='movie'?' on':''}`} onClick={()=>setTab('movie')}>
+          <button className={`tab${tab==='movie'?' on':''}`} onClick={()=>switchTab('movie')}>
             Movies ({counts.movie.total})
           </button>
-          <button className={`tab${tab==='tv'?' on':''}`} onClick={()=>setTab('tv')}>
+          <button className={`tab${tab==='tv'?' on':''}`} onClick={()=>switchTab('tv')}>
             TV Shows ({counts.tv.total})
           </button>
         </div>
@@ -874,8 +1009,7 @@ function App(){
       </div>
 
       <div className="main">
-        {q&&!visible.length&&<div className="empty">No results for "{q}"</div>}
-        {!q&&!visible.length&&<div className="empty">Nothing here yet — tap ＋ Add to get started</div>}
+        {!visible.length&&<div className="empty">Nothing here yet — tap ＋ Add to get started</div>}
         <div className="grid">
           {visible.map(it=><Card key={it.id} item={it} onTap={setDetail}/>)}
         </div>
@@ -887,6 +1021,7 @@ function App(){
           onClose={()=>setDetail(null)}
           onWatched={removeItem}
           onRemove={removeItem}
+          onUpdateItem={updateItem}
         />
       )}
       {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem}/>}
