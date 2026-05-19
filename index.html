@@ -97,6 +97,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
 .badge{border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.3px;padding:2px 5px;white-space:nowrap}
 .cdesc{color:var(--text2);font-size:10px;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.in-theaters-tag{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#b52a2a,#e03c3c);color:#fff;font-size:8px;font-weight:800;letter-spacing:.8px;padding:4px 6px;text-align:center;text-transform:uppercase}
 
 /* MODAL BASE */
 .overlay{align-items:flex-end;background:rgba(0,0,0,.82);display:flex;inset:0;justify-content:center;padding:0;position:fixed;z-index:200}
@@ -205,27 +206,27 @@ const DATA=[
   mk('movie','released','Hoppers',['Disney+']),
   mk('movie','released','Eddington',['Max']),
   // MOVIES — COMING SOON
-  mk('movie','comingSoon','The Super Mario Bros. Movie 2','','','5/15/26'),
-  mk('movie','comingSoon','In the Grey','','','5/15/26'),
-  mk('movie','comingSoon','The Mandalorian & Grogu','','','5/22/26'),
-  mk('movie','comingSoon','Backrooms','','','5/29/26'),
-  mk('movie','comingSoon','Scary Movie 6','','','6/5/26'),
-  mk('movie','comingSoon','Toy Story 5','','','6/19/26'),
-  mk('movie','comingSoon','The Odyssey','','','7/17/26'),
-  mk('movie','comingSoon','Spider-Man: Brand New Day','','','7/31/26'),
-  mk('movie','comingSoon','Digger','','','8/2/26'),
-  mk('movie','comingSoon','Resident Evil','','','9/18/26'),
-  mk('movie','comingSoon','Avengers: Doomsday','','','12/18/26'),
-  mk('movie','comingSoon','Dune: Messiah','','','12/18/26'),
-  mk('movie','comingSoon','Jumanji 3','','','12/25/26'),
-  mk('movie','comingSoon','Sonic the Hedgehog 4','','','Mar 2027'),
-  mk('movie','comingSoon','The Legend of Zelda','','','5/7/27'),
-  mk('movie','comingSoon','Star Wars: Starfighter','','','5/29/27'),
-  mk('movie','comingSoon','Spider-Man: Beyond the Spider-Verse','','','6/18/27'),
-  mk('movie','comingSoon','A Quiet Place: Part III','','','7/30/27'),
-  mk('movie','comingSoon','Avengers: Secret Wars','','','12/17/27'),
-  mk('movie','comingSoon','Horizon Zero Dawn','','','TBD'),
-  mk('movie','comingSoon','Helldivers','','','TBD'),
+  mk('movie','comingSoon','The Super Mario Bros. Movie 2'),
+  mk('movie','comingSoon','In the Grey'),
+  mk('movie','comingSoon','The Mandalorian & Grogu'),
+  mk('movie','comingSoon','Backrooms'),
+  mk('movie','comingSoon','Scary Movie 6'),
+  mk('movie','comingSoon','Toy Story 5'),
+  mk('movie','comingSoon','The Odyssey'),
+  mk('movie','comingSoon','Spider-Man: Brand New Day'),
+  mk('movie','comingSoon','Digger'),
+  mk('movie','comingSoon','Resident Evil'),
+  mk('movie','comingSoon','Avengers: Doomsday'),
+  mk('movie','comingSoon','Dune: Messiah'),
+  mk('movie','comingSoon','Jumanji 3'),
+  mk('movie','comingSoon','Sonic the Hedgehog 4'),
+  mk('movie','comingSoon','The Legend of Zelda'),
+  mk('movie','comingSoon','Star Wars: Starfighter'),
+  mk('movie','comingSoon','Spider-Man: Beyond the Spider-Verse'),
+  mk('movie','comingSoon','A Quiet Place: Part III'),
+  mk('movie','comingSoon','Avengers: Secret Wars'),
+  mk('movie','comingSoon','Horizon Zero Dawn'),
+  mk('movie','comingSoon','Helldivers'),
   // MOVIES — REWATCH
   mk('movie','rewatch',"The Emperor's New Groove"),
   mk('movie','rewatch','Hercules'),
@@ -252,12 +253,12 @@ const DATA=[
   mk('tv','released','The Wright Plan',['Max']),
   mk('tv','released','Too Much',['Netflix']),
   // TV — COMING SOON
-  mk('tv','comingSoon','House of the Dragon',['Max'],'','6/21/26'),
-  mk('tv','comingSoon','The Last of Us',['Max'],'','May 2027'),
-  mk('tv','comingSoon','Severance',['Apple'],'','TBD'),
-  mk('tv','comingSoon','Boots',['Netflix'],'','TBD'),
-  mk('tv','comingSoon','God of War',['Prime'],'','TBD'),
-  mk('tv','comingSoon','Tomb Raider',['Prime'],'','TBD'),
+  mk('tv','comingSoon','House of the Dragon',['Max']),
+  mk('tv','comingSoon','The Last of Us',['Max']),
+  mk('tv','comingSoon','Severance',['Apple']),
+  mk('tv','comingSoon','Boots',['Netflix']),
+  mk('tv','comingSoon','God of War',['Prime']),
+  mk('tv','comingSoon','Tomb Raider',['Prime']),
   // TV — REWATCH
   mk('tv','rewatch','The Office',['Peacock']),
   mk('tv','rewatch','Parks and Recreation',['Peacock']),
@@ -333,6 +334,51 @@ async function runQ(tasks,limit){
   });
 }
 
+/* ── DATE / SORT / AUTO-MOVE ── */
+function parseDate(s){
+  if(!s)return null;
+  s=s.trim();
+  if(!s||s==='TBD'||s==='?')return null;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return new Date(s+'T00:00:00');
+  const a=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if(a)return new Date(2000+~~a[3],~~a[1]-1,~~a[2]);
+  const b=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(b)return new Date(~~b[3],~~b[1]-1,~~b[2]);
+  const c=s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if(c){const M={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    const m=M[c[1].toLowerCase().slice(0,3)];if(m!=null)return new Date(~~c[2],m,1);}
+  return null;
+}
+
+function autoMove(items){
+  const now=Date.now(),DAYS=45;
+  return items.map(i=>{
+    if(i.category!=='comingSoon')return i;
+    const d=parseDate(i.userDate);
+    if(!d||d.getTime()>now)return i;
+    return{...i,category:'released',inTheaters:(now-d.getTime())/86400000<=DAYS};
+  });
+}
+
+function formatDate(item){
+  const d=parseDate(item.tmdbDate)||parseDate(item.userDate);
+  if(!d)return'';
+  if(item.category==='comingSoon'||item.inTheaters)
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return String(d.getFullYear());
+}
+
+function sortedItems(arr,sec){
+  const ms=i=>{const d=parseDate(i.userDate)||parseDate(i.tmdbDate);return d?d.getTime():null;};
+  return[...arr].sort((a,b)=>{
+    const da=ms(a),db=ms(b);
+    if(da==null&&db==null)return 0;
+    if(da==null)return 1;
+    if(db==null)return-1;
+    return sec==='comingSoon'?da-db:db-da;
+  });
+}
+
 /* ── COMPONENTS ── */
 function Badge({svc,note}){
   const s=SVC[svc]||{bg:'#444',fg:'#fff'};
@@ -340,7 +386,7 @@ function Badge({svc,note}){
 }
 
 function Card({item,onTap}){
-  const date=item.userDate||(item.tmdbDate?item.tmdbDate.slice(0,4):'');
+  const date=formatDate(item);
   return(
     <div className="card" onClick={()=>onTap(item)}>
       <div className="poster">
@@ -348,6 +394,7 @@ function Card({item,onTap}){
           ?<img src={item.poster} alt={item.title} loading="lazy"/>
           :<div className="poster-ph">🍿<span>{item.title}</span></div>
         }
+        {item.inTheaters&&<div className="in-theaters-tag">🎬 In Theaters</div>}
       </div>
       <div className="cbody">
         <div className="ctitle">{item.title}</div>
@@ -364,7 +411,7 @@ function Card({item,onTap}){
 }
 
 function DetailModal({item,onClose,onWatched,onRemove}){
-  const date=item.userDate||(item.tmdbDate?item.tmdbDate.slice(0,4):'');
+  const date=formatDate(item);
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal">
@@ -377,11 +424,10 @@ function DetailModal({item,onClose,onWatched,onRemove}){
           <div className="dm-info">
             <div className="dm-title">{item.title}</div>
             {date&&<div className="dm-date">{date}</div>}
-            {item.streaming&&item.streaming.length>0&&(
-              <div className="dm-badges">
-                {item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
-              </div>
-            )}
+            <div className="dm-badges">
+              {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
+              {item.streaming&&item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
+            </div>
           </div>
         </div>
         {item.description&&<div className="dm-desc">{item.description}</div>}
@@ -489,10 +535,10 @@ function AddModal({onClose,onAdd}){
 function App(){
   const[items,setItems]=useState(()=>{
     try{
-      const s=localStorage.getItem('watchlist-v3');
-      if(s)return JSON.parse(s);
+      const s=localStorage.getItem('watchlist-v4');
+      if(s)return autoMove(JSON.parse(s));
     }catch{}
-    return DATA;
+    return autoMove(DATA);
   });
   const[tab,setTab]=useState('movie');
   const[section,setSection]=useState('released');
@@ -504,7 +550,7 @@ function App(){
   const[fetching,setFetching]=useState(false);
 
   useEffect(()=>{
-    try{localStorage.setItem('watchlist-v3',JSON.stringify(items));}catch{}
+    try{localStorage.setItem('watchlist-v4',JSON.stringify(items));}catch{}
   },[items]);
 
   useEffect(()=>{
@@ -520,7 +566,7 @@ function App(){
       });
       setDone(n=>n+1);
     });
-    runQ(tasks,5).finally(()=>setFetching(false));
+    runQ(tasks,5).finally(()=>{setFetching(false);setItems(prev=>autoMove(prev));});
   },[]);// eslint-disable-line
 
   const removeItem=useCallback(id=>{
@@ -551,7 +597,7 @@ function App(){
   const visible=useMemo(()=>{
     let arr=items.filter(i=>i.type===tab&&i.category===section);
     if(q)arr=arr.filter(i=>i.title.toLowerCase().includes(q.toLowerCase()));
-    return arr;
+    return sortedItems(arr,section);
   },[items,tab,section,q]);
 
   const pct=total>0?(done/total)*100:100;
