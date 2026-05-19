@@ -47,7 +47,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .search{flex:1;min-width:100px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
 .search:focus{border-color:var(--accent)}
 .search::placeholder{color:var(--text2)}
-.hdr-btns{display:flex;gap:7px;flex-shrink:0}
+.hdr-btns{display:flex;gap:7px;flex-shrink:0;margin-left:auto}
 .btn{background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;padding:7px 12px;transition:background .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .btn:hover{background:rgba(255,255,255,.14)}
 .btn:active{opacity:.8}
@@ -504,15 +504,15 @@ function Card({item,onTap}){
           ?<img src={item.poster} alt={item.title} loading="lazy"/>
           :<div className="poster-ph">🍿<span>{item.title}</span></div>
         }
-        {item.inTheaters&&<div className="in-theaters-tag">🎬 In Theaters</div>}
       </div>
       <div className="cbody">
         <div className="ctitle">{item.title}</div>
         {seasonLine&&<div className="cseason">{seasonLine}</div>}
         {dateStr&&<div className="cdate">{dateStr}</div>}
-        {item.streaming&&item.streaming.length>0&&(
+        {(item.inTheaters||item.streaming?.length>0)&&(
           <div className="badges">
-            {item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
+            {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
+            {item.streaming&&item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
           </div>
         )}
         {item.description&&<div className="cdesc">{item.description}</div>}
