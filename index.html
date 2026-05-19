@@ -106,7 +106,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .dm-drag{width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 16px}
 .modal-title{font-size:17px;font-weight:700;margin-bottom:14px}
 .row2{display:flex;gap:8px;margin-bottom:10px}
-.minput{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:10px;outline:none;padding:9px 13px;width:100%;transition:border-color .2s}
+.minput{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;margin-bottom:10px;outline:none;padding:9px 13px;width:100%;transition:border-color .2s}
 .minput:focus{border-color:var(--accent)}
 .msel{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:8px 12px;width:100%;outline:none}
 .msel option{background:var(--card)}
@@ -124,6 +124,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .spinner{animation:spin 1s linear infinite;border:2px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;display:inline-block;height:15px;width:15px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+.tv-sp{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.tv-sp-title{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.tv-sp-row{align-items:center;display:flex;justify-content:space-between;margin-bottom:10px}
+.tv-sp-label{color:var(--text);font-size:13px}
+.stepper{align-items:center;display:flex;gap:10px}
+.stepper-btn{background:rgba(255,255,255,.1);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:18px;line-height:1;padding:2px 12px;-webkit-tap-highlight-color:transparent}
+.stepper-btn:active{opacity:.7}
+.stepper-val{color:var(--accent);font-size:13px;font-weight:600;min-width:72px;text-align:center}
+.tv-sp-toggle{align-items:center;cursor:pointer;display:flex;gap:10px;padding:4px 0;-webkit-tap-highlight-color:transparent}
+.tv-sp-check{font-size:16px;transition:color .2s;color:var(--text2)}
+.tv-sp-check.on{color:var(--green)}
+.tv-sp-upcoming{display:flex;gap:8px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -413,7 +425,10 @@ function autoMove(items){
 function formatDate(item){
   if(item.yearRange)return item.yearRange;
   const d=parseDate(item.tmdbDate)||parseDate(item.userDate);
-  if(!d)return'';
+  if(!d){
+    if(item.userDate&&/^\d{4}$/.test(item.userDate.trim()))return item.userDate.trim();
+    return'';
+  }
   if(item.category==='comingSoon'||item.inTheaters)
     return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   return String(d.getFullYear());
@@ -508,21 +523,52 @@ function DetailModal({item,onClose,onWatched,onRemove}){
 function AddModal({onClose,onAdd}){
   const[q,setQ]=useState('');
   const[mtype,setMtype]=useState('movie');
-  const[intent,setIntent]=useState('watch'); // 'watch' | 'rewatch'
+  const[intent,setIntent]=useState('watch');
   const[results,setResults]=useState([]);
   const[sel,setSel]=useState(null);
   const[loading,setLoading]=useState(false);
   const[adding,setAdding]=useState(false);
   const[svc,setSvc]=useState('');
   const[sNote,setSNote]=useState('');
+  // TV season state
+  const[tvDets,setTvDets]=useState(null);
+  const[tvFetching,setTvFetching]=useState(false);
+  const[manualSeason,setManualSeason]=useState(1);
+  const[trackUpcoming,setTrackUpcoming]=useState(false);
+  const[upcomingSeasNum,setUpcomingSeasNum]=useState('');
+  const[upcomingYr,setUpcomingYr]=useState('');
   const ref=useRef(null);
   useEffect(()=>{ref.current?.focus();},[]);
 
+  const resetTV=()=>{setTvDets(null);setTvFetching(false);setManualSeason(1);setTrackUpcoming(false);setUpcomingSeasNum('');setUpcomingYr('');};
+
+  const selectResult=async r=>{
+    setSel(r);
+    if(mtype==='tv'&&intent==='watch'&&r.tmdbId){
+      setTvFetching(true);setTvDets(null);
+      const dets=await fetchTVDetails(r.tmdbId);
+      setTvDets(dets);
+      if(dets){
+        const cur=dets.currentSeason?.season||1;
+        setManualSeason(cur);
+        if(dets.upcomingSeason){
+          setTrackUpcoming(true);
+          setUpcomingSeasNum(String(dets.upcomingSeason.season));
+          setUpcomingYr(dets.upcomingSeason.date?.slice(0,4)||'');
+        }else{
+          setTrackUpcoming(false);
+          setUpcomingSeasNum(String(cur+1));
+          setUpcomingYr('');
+        }
+      }
+      setTvFetching(false);
+    }
+  };
+
   const doSearch=async()=>{
     if(!q.trim())return;
-    setLoading(true);setSel(null);
+    setLoading(true);setSel(null);resetTV();
     const r=await tmdbSearch(q,mtype);
-    // For movies in watch mode, sort to prefer upcoming titles
     const sorted=intent==='watch'&&mtype==='movie'
       ?[...r].sort((a,b)=>{
           const af=a.date&&a.date>=TODAY()?1:0;
@@ -539,7 +585,6 @@ function AddModal({onClose,onAdd}){
     const isRewatch=intent==='rewatch';
     const title=sel?sel.title:q.trim();
 
-    // Auto-fetch streaming if not manually specified
     let streaming=svc?[svc]:[];
     if(!streaming.length&&sel?.tmdbId){
       const pvs=await getProviders(sel.tmdbId,mtype);
@@ -557,7 +602,7 @@ function AddModal({onClose,onAdd}){
     if(isRewatch){
       let seasonNote='',yearRange='';
       if(mtype==='tv'&&sel?.tmdbId){
-        const dets=await fetchTVDetails(sel.tmdbId);
+        const dets=tvDets||(await fetchTVDetails(sel.tmdbId));
         if(dets){
           const cur=dets.currentSeason;
           const startYear=dets.firstAirDate?.slice(0,4)||'';
@@ -573,28 +618,27 @@ function AddModal({onClose,onAdd}){
       const cat=sel?.date&&sel.date>=TODAY()?'comingSoon':'released';
       onAdd({...base,id:uid(),type:'movie',category:cat,title});
     }else{
-      // TV — fetch season details and potentially create 2 cards
-      let cur=null,upc=null,sk=null;
-      if(sel?.tmdbId){
-        sk=showKey(sel.tmdbId);
-        const dets=await fetchTVDetails(sel.tmdbId);
-        if(dets){cur=dets.currentSeason;upc=dets.upcomingSeason;}
-        base.showKey=sk;base.tvDetailsFetched=true;
-      }
-      if(cur){
-        onAdd({...base,id:uid(),type:'tv',category:'released',title,
-          tmdbDate:cur.date,seasonNote:`Season ${cur.season}`});
-      }
-      if(upc){
+      // TV watch — use manualSeason + optional upcoming from panel
+      const sk=sel?.tmdbId?showKey(sel.tmdbId):null;
+      const relDate=tvDets?.currentSeason?.date||sel?.date||'';
+      onAdd({...base,id:uid(),type:'tv',category:'released',title,
+        tmdbDate:relDate,seasonNote:`Season ${manualSeason}`,
+        showKey:sk,tvDetailsFetched:true});
+      if(trackUpcoming&&upcomingSeasNum){
+        const seasNum=parseInt(upcomingSeasNum)||(manualSeason+1);
+        const yrStr=upcomingYr.trim();
+        const tmdbUpDate=tvDets?.upcomingSeason?.date||'';
         onAdd({...base,id:uid(),type:'tv',category:'comingSoon',title,
-          tmdbDate:upc.date,seasonNote:`Season ${upc.season}`,streaming:[]});
-      }
-      if(!cur&&!upc){
-        onAdd({...base,id:uid(),type:'tv',category:'released',title});
+          tmdbDate:tmdbUpDate,
+          userDate:!tmdbUpDate&&yrStr?yrStr:'',
+          seasonNote:`Season ${seasNum}`,
+          showKey:sk,streaming:[],autoCreated:false,tvDetailsFetched:true});
       }
     }
     setAdding(false);onClose();
   };
+
+  const showTVPanel=mtype==='tv'&&intent==='watch'&&!!sel;
 
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -602,16 +646,16 @@ function AddModal({onClose,onAdd}){
         <div className="dm-drag"/>
         <div className="modal-title">Add to Watchlist</div>
         <div className="row2">
-          <select className="msel" value={mtype} onChange={e=>{setMtype(e.target.value);setResults([]);setSel(null);}}>
+          <select className="msel" value={mtype} onChange={e=>{setMtype(e.target.value);setResults([]);setSel(null);resetTV();}}>
             <option value="movie">Movie</option>
             <option value="tv">TV Show</option>
           </select>
         </div>
         <div className="intent-toggle" style={{marginBottom:12}}>
-          <button className={`intent-btn${intent==='watch'?' on':''}`} onClick={()=>setIntent('watch')}>
+          <button className={`intent-btn${intent==='watch'?' on':''}`} onClick={()=>{setIntent('watch');resetTV();}}>
             Want to Watch
           </button>
-          <button className={`intent-btn${intent==='rewatch'?' on':''}`} onClick={()=>setIntent('rewatch')}>
+          <button className={`intent-btn${intent==='rewatch'?' on':''}`} onClick={()=>{setIntent('rewatch');resetTV();}}>
             Rewatch
           </button>
         </div>
@@ -625,7 +669,7 @@ function AddModal({onClose,onAdd}){
         {results.length>0&&(
           <div className="results">
             {results.map(r=>(
-              <div key={r.tmdbId} className={`ritem${sel?.tmdbId===r.tmdbId?' sel':''}`} onClick={()=>setSel(r)}>
+              <div key={r.tmdbId} className={`ritem${sel?.tmdbId===r.tmdbId?' sel':''}`} onClick={()=>selectResult(r)}>
                 {r.poster
                   ?<img className="rposter" src={r.poster} alt={r.title}/>
                   :<div className="rposter" style={{display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',height:72}}>?</div>
@@ -639,11 +683,46 @@ function AddModal({onClose,onAdd}){
             ))}
           </div>
         )}
+        {showTVPanel&&(
+          <div className="tv-sp">
+            <div className="tv-sp-title">Season setup</div>
+            {tvFetching?(
+              <div style={{color:'var(--text2)',fontSize:13,display:'flex',alignItems:'center',gap:8}}>
+                Loading season info <span className="spinner"/>
+              </div>
+            ):(
+              <>
+                <div className="tv-sp-row">
+                  <span className="tv-sp-label">Released season</span>
+                  <div className="stepper">
+                    <button className="stepper-btn" onClick={()=>setManualSeason(s=>Math.max(1,s-1))}>−</button>
+                    <span className="stepper-val">Season {manualSeason}</span>
+                    <button className="stepper-btn" onClick={()=>setManualSeason(s=>s+1)}>+</button>
+                  </div>
+                </div>
+                <div className="tv-sp-toggle" onClick={()=>setTrackUpcoming(v=>!v)}>
+                  <span className={`tv-sp-check${trackUpcoming?' on':''}`}>{trackUpcoming?'✓':'○'}</span>
+                  <span className="tv-sp-label">Track upcoming season</span>
+                </div>
+                {trackUpcoming&&(
+                  <div className="tv-sp-upcoming">
+                    <input className="minput" style={{marginBottom:0,width:90}} type="number"
+                      placeholder="Season #" value={upcomingSeasNum}
+                      onChange={e=>setUpcomingSeasNum(e.target.value)}/>
+                    <input className="minput" style={{marginBottom:0,flex:1}}
+                      placeholder="Expected year (e.g. 2027)" value={upcomingYr}
+                      onChange={e=>setUpcomingYr(e.target.value)}/>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
         <input className="minput" placeholder="Streaming service (optional — auto-detected)" value={svc} onChange={e=>setSvc(e.target.value)}/>
         <input className="minput" style={{marginBottom:0}} placeholder="Price note (e.g. $5.99)" value={sNote} onChange={e=>setSNote(e.target.value)}/>
         <div className="mactions">
           <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn-gold" onClick={handleAdd} disabled={adding}>
+          <button className="btn btn-gold" onClick={handleAdd} disabled={adding||tvFetching}>
             {adding?<span className="spinner"/>:sel?`Add "${sel.title.slice(0,22)}${sel.title.length>22?'…':''}"` :'Add Item'}
           </button>
         </div>
