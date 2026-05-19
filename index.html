@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="Watchlist">
 <meta name="theme-color" content="#1c1530">
 <title>Watchlist</title>
-<!-- Generate PWA icon before React loads so Safari picks it up for Add to Home Screen -->
 <script>
 (function(){
   try{
@@ -41,8 +40,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
-
-/* HEADER */
 .hdr{background:linear-gradient(180deg,#1c1530 0%,#0d0d16 100%);border-bottom:1px solid var(--border);padding:12px 14px 0;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.6)}
 .hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .hdr-title{font-size:20px;font-weight:800;color:var(--accent);letter-spacing:-.5px;white-space:nowrap}
@@ -64,26 +61,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .prog-label{color:var(--text2);font-size:11px;margin-bottom:4px}
 .prog-track{background:rgba(255,255,255,.06);border-radius:3px;height:3px;overflow:hidden}
 .prog-fill{background:var(--accent);height:100%;transition:width .3s}
-
-/* MAIN TABS */
 .tabs{display:flex}
 .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);cursor:pointer;font-size:14px;font-weight:600;padding:10px 18px;transition:color .2s,border-color .2s;-webkit-tap-highlight-color:transparent}
 .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
 .tab:hover:not(.on){color:var(--text)}
-
-/* SEGMENTED CONTROL */
 .seg-wrap{padding:10px 0 12px}
 .seg{background:rgba(255,255,255,.07);border-radius:11px;display:flex;padding:3px;gap:2px}
 .seg-btn{background:none;border:none;border-radius:9px;color:var(--text2);cursor:pointer;flex:1;font-size:13px;font-weight:600;padding:8px 6px;transition:all .2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .seg-btn.on{background:var(--card2);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.5)}
 .seg-cnt{font-size:11px;font-weight:400;opacity:.65;margin-left:3px}
-
-/* MAIN */
 .main{padding:14px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .empty{color:var(--text2);font-size:13px;padding:40px;text-align:center}
-
-/* CARD */
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s}
 .card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.65)}
 .card:active{transform:scale(.97);opacity:.9}
@@ -92,41 +81,38 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .poster-ph{align-items:center;color:var(--text2);display:flex;flex-direction:column;font-size:28px;height:100%;justify-content:center;gap:6px}
 .poster-ph span{font-size:10px;padding:0 8px;text-align:center;line-height:1.3}
 .cbody{padding:8px}
-.ctitle{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ctitle{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cseason{color:var(--text2);font-size:10px;font-style:italic;margin-bottom:2px}
 .cdate{color:var(--accent);font-size:11px;font-weight:500;margin-bottom:3px}
 .badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
 .badge{border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.3px;padding:2px 5px;white-space:nowrap}
 .cdesc{color:var(--text2);font-size:10px;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.cseason{color:var(--text2);font-size:10px;font-style:italic;margin-bottom:3px}
-.dm-season{color:var(--text2);font-size:12px;font-style:italic;margin-bottom:6px}
 .in-theaters-tag{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#b52a2a,#e03c3c);color:#fff;font-size:8px;font-weight:800;letter-spacing:.8px;padding:4px 6px;text-align:center;text-transform:uppercase}
-
-/* MODAL BASE */
 .overlay{align-items:flex-end;background:rgba(0,0,0,.82);display:flex;inset:0;justify-content:center;padding:0;position:fixed;z-index:200}
 @media(min-width:500px){.overlay{align-items:center;padding:16px}}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;max-height:90vh;width:100%;overflow-y:auto;padding:20px}
 @media(min-width:500px){.modal{border-radius:16px;max-width:480px;max-height:85vh}}
-
-/* DETAIL MODAL */
 .dm-hero{display:flex;gap:14px;margin-bottom:16px}
 .dm-poster{border-radius:10px;flex-shrink:0;object-fit:cover;width:90px;align-self:flex-start}
 .dm-poster-ph{width:90px;height:135px;background:var(--card2);border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:36px}
 .dm-info{flex:1;min-width:0}
-.dm-title{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:6px}
+.dm-title{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:4px}
+.dm-season{color:var(--text2);font-size:12px;font-style:italic;margin-bottom:5px}
 .dm-date{color:var(--accent);font-size:13px;font-weight:600;margin-bottom:8px}
 .dm-badges{display:flex;flex-wrap:wrap;gap:5px}
 .dm-desc{color:var(--text2);font-size:13px;line-height:1.65;margin-bottom:20px}
 .dm-actions{display:flex;gap:8px}
 .dm-actions .btn{flex:1;padding:11px 8px;font-size:13px;font-weight:600;text-align:center}
 .dm-drag{width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 16px}
-
-/* ADD MODAL */
 .modal-title{font-size:17px;font-weight:700;margin-bottom:14px}
 .row2{display:flex;gap:8px;margin-bottom:10px}
 .minput{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:10px;outline:none;padding:9px 13px;width:100%;transition:border-color .2s}
 .minput:focus{border-color:var(--accent)}
 .msel{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:8px 12px;width:100%;outline:none}
 .msel option{background:var(--card)}
+.intent-toggle{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.intent-btn{background:none;border:none;color:var(--text2);cursor:pointer;flex:1;font-size:13px;font-weight:600;padding:9px;transition:all .2s}
+.intent-btn.on{background:var(--accent);color:#000}
 .results{margin-bottom:12px}
 .ritem{align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:11px;margin-bottom:7px;padding:10px;transition:background .15s,border-color .15s}
 .ritem:hover,.ritem.sel{background:rgba(229,178,93,.1);border-color:var(--accent)}
@@ -147,6 +133,7 @@ const{useState,useEffect,useCallback,useRef,useMemo}=React;
 
 const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjVhMWIxMzA0ZjNjMzA1NjVhMGMxNGQxZDI2MzM1NSIsIm5iZiI6MTc3OTA1ODQxNS4yMDQsInN1YiI6IjZhMGE0NmVmMjc0YmRmZjdkNzFlNzJiMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.HM8iWYDC4djozp5-2lEjq1pi1Gy7NYaaF7kZ0W1I8N4';
 const IMG='https://image.tmdb.org/t/p/w342';
+const TODAY=()=>new Date().toISOString().slice(0,10);
 
 const SVC={
   'Netflix':   {bg:'#e50914',fg:'#fff'},
@@ -160,8 +147,7 @@ const SVC={
   'Paramount+':{bg:'#0064ff',fg:'#fff'},
   'YouTube':   {bg:'#ff0000',fg:'#fff'},
 };
-
-const PROVIDER_MAP={
+const PMAP={
   'Netflix':'Netflix','Amazon Prime Video':'Prime','Prime Video':'Prime','Amazon Video':'Prime',
   'Disney Plus':'Disney+','Disney+':'Disney+','Max':'Max','HBO Max':'Max',
   'Apple TV Plus':'Apple','Apple TV+':'Apple','Peacock Premium':'Peacock','Peacock':'Peacock',
@@ -171,11 +157,13 @@ const PROVIDER_MAP={
 
 let _n=0;
 const uid=()=>`i${++_n}${Math.random().toString(36).slice(2,5)}`;
+const showKey=id=>`tv-${id}`;
 
-const mk=(type,cat,title,svc=[],sNote='',uDate='')=>({
+const mk=(type,cat,title,svc=[],sNote='')=>({
   id:uid(),type,category:cat,title,streaming:svc,streamingNote:sNote,
-  userDate:uDate,note:'',
-  tmdbFetched:false,poster:null,description:'',tmdbDate:'',tmdbId:null,
+  userDate:'',note:'',tmdbFetched:false,tvDetailsFetched:false,
+  poster:null,description:'',tmdbDate:'',tmdbId:null,showKey:null,
+  seasonNote:'',yearRange:'',inTheaters:false,autoCreated:false,
 });
 
 const DATA=[
@@ -283,7 +271,7 @@ async function tmdbSearch(title,type){
     );
     if(!r.ok)return[];
     const d=await r.json();
-    return(d.results||[]).slice(0,5).map(x=>({
+    return(d.results||[]).slice(0,6).map(x=>({
       tmdbId:x.id,title:x.title||x.name||'',
       year:(x.release_date||x.first_air_date||'').slice(0,4),
       date:x.release_date||x.first_air_date||'',
@@ -303,9 +291,8 @@ async function getProviders(tmdbId,type){
     const d=await r.json();
     const us=d.results?.US;
     if(!us)return[];
-    const all=[...(us.flatrate||[]),(us.free||[])].flat();
-    const mapped=all.map(p=>PROVIDER_MAP[p.provider_name]).filter(Boolean);
-    return[...new Set(mapped)];
+    const all=[...(us.flatrate||[]),...(us.free||[])];
+    return[...new Set(all.map(p=>PMAP[p.provider_name]).filter(Boolean))];
   }catch{return[];}
 }
 
@@ -316,36 +303,68 @@ async function fetchTVDetails(tmdbId){
     const d=await r.json();
     const next=d.next_episode_to_air;
     const last=d.last_episode_to_air;
+    // Only flag as "new upcoming season" if next ep is a genuinely new season
+    const isNewSeason=next&&last&&next.season_number>last.season_number;
     return{
-      nextSeason:next?{date:next.air_date,season:next.season_number}:null,
-      lastSeason:last?{date:last.air_date,season:last.season_number}:null,
+      currentSeason:last?{date:last.air_date,season:last.season_number}:null,
+      upcomingSeason:isNewSeason?{date:next.air_date,season:next.season_number}:null,
+      totalSeasons:d.number_of_seasons||1,
+      firstAirDate:d.first_air_date||'',
     };
   }catch{return null;}
 }
 
+// Apply TV detail updates to an item based on its category
+function applyTVDets(item,dets,overrideStreaming){
+  if(!dets)return{tvDetailsFetched:true};
+  const{currentSeason:cur,upcomingSeason:upc,totalSeasons,firstAirDate}=dets;
+  const sk=item.tmdbId?showKey(item.tmdbId):null;
+  if(item.category==='rewatch'){
+    const startYear=firstAirDate?.slice(0,4)||'';
+    const endYear=cur?.date?.slice(0,4)||startYear;
+    return{
+      tvDetailsFetched:true,showKey:sk,
+      ...(cur?{tmdbDate:cur.date}:{}),
+      seasonNote:totalSeasons>1?`Season 1–${totalSeasons}`:`Season ${totalSeasons}`,
+      yearRange:startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear,
+    };
+  }
+  if(item.category==='comingSoon'){
+    const ep=upc||cur;
+    return{
+      tvDetailsFetched:true,showKey:sk,
+      ...(ep?{tmdbDate:ep.date,seasonNote:`Season ${ep.season}`}:{}),
+      _companionCat:'released',_companionEp:cur,
+    };
+  }
+  // released
+  return{
+    tvDetailsFetched:true,showKey:sk,
+    ...(cur?{tmdbDate:cur.date,seasonNote:`Season ${cur.season}`}:{}),
+    _companionCat:'comingSoon',_companionEp:upc,
+  };
+}
+
 async function fetchItem(item){
   const results=await tmdbSearch(item.title,item.type);
-  // For Coming Soon, prefer results with a future release date
+  // For comingSoon prefer a result with a future release date
   let r=null;
   if(item.category==='comingSoon'&&results.length>1){
-    const today=new Date().toISOString().slice(0,10);
-    r=results.find(x=>x.date&&x.date>=today)||results[0];
+    r=results.find(x=>x.date&&x.date>=TODAY())||results[0];
   }else{
     r=results[0]||null;
   }
   if(!r)return{tmdbFetched:true,tvDetailsFetched:item.type==='tv'};
   const update={poster:r.poster,description:r.description,tmdbDate:r.date,tmdbId:r.tmdbId,tmdbFetched:true};
+  // Auto-fetch streaming only when user hasn't specified any
   if(!item.streaming||!item.streaming.length){
     const pvs=await getProviders(r.tmdbId,item.type);
     if(pvs.length)update.streaming=pvs;
   }
   if(item.type==='tv'){
     const dets=await fetchTVDetails(r.tmdbId);
-    if(dets){
-      const ep=dets.nextSeason||dets.lastSeason;
-      if(ep){update.tmdbDate=ep.date;update.seasonNote=`Season ${ep.season}`;}
-    }
-    update.tvDetailsFetched=true;
+    const tvUpd=applyTVDets({...item,...update},dets);
+    Object.assign(update,tvUpd);
   }
   return update;
 }
@@ -365,7 +384,7 @@ async function runQ(tasks,limit){
   });
 }
 
-/* ── DATE / SORT / AUTO-MOVE ── */
+/* ── DATE UTILS ── */
 function parseDate(s){
   if(!s)return null;
   s=s.trim();
@@ -392,6 +411,7 @@ function autoMove(items){
 }
 
 function formatDate(item){
+  if(item.yearRange)return item.yearRange;
   const d=parseDate(item.tmdbDate)||parseDate(item.userDate);
   if(!d)return'';
   if(item.category==='comingSoon'||item.inTheaters)
@@ -404,10 +424,20 @@ function sortedItems(arr,sec){
   return[...arr].sort((a,b)=>{
     const da=ms(a),db=ms(b);
     if(da==null&&db==null)return 0;
-    if(da==null)return 1;
-    if(db==null)return-1;
+    if(da==null)return 1;if(db==null)return-1;
     return sec==='comingSoon'?da-db:db-da;
   });
+}
+
+// Creates a companion card when a TV show has both a current and upcoming season
+function makeCompanion(base,cat,ep){
+  return{
+    ...base,id:uid(),category:cat,
+    tmdbDate:ep.date,seasonNote:`Season ${ep.season}`,
+    autoCreated:true,inTheaters:false,userDate:'',
+    // Coming soon companions don't have streaming yet
+    ...(cat==='comingSoon'?{streaming:[]}:{}),
+  };
 }
 
 /* ── COMPONENTS ── */
@@ -444,6 +474,7 @@ function Card({item,onTap}){
 
 function DetailModal({item,onClose,onWatched,onRemove}){
   const date=formatDate(item);
+  const canWatch=item.category!=='comingSoon';
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal">
@@ -467,7 +498,7 @@ function DetailModal({item,onClose,onWatched,onRemove}){
         <div className="dm-actions">
           <button className="btn" onClick={onClose}>Close</button>
           <button className="btn btn-danger" onClick={()=>{onRemove(item.id);onClose();}}>Remove</button>
-          <button className="btn btn-watched" onClick={()=>{onWatched(item.id);onClose();}}>✓ Watched</button>
+          {canWatch&&<button className="btn btn-watched" onClick={()=>{onWatched(item.id);onClose();}}>✓ Watched</button>}
         </div>
       </div>
     </div>
@@ -477,13 +508,13 @@ function DetailModal({item,onClose,onWatched,onRemove}){
 function AddModal({onClose,onAdd}){
   const[q,setQ]=useState('');
   const[mtype,setMtype]=useState('movie');
-  const[cat,setCat]=useState('released');
+  const[intent,setIntent]=useState('watch'); // 'watch' | 'rewatch'
   const[results,setResults]=useState([]);
   const[sel,setSel]=useState(null);
   const[loading,setLoading]=useState(false);
+  const[adding,setAdding]=useState(false);
   const[svc,setSvc]=useState('');
   const[sNote,setSNote]=useState('');
-  const[uDate,setUDate]=useState('');
   const ref=useRef(null);
   useEffect(()=>{ref.current?.focus();},[]);
 
@@ -491,23 +522,78 @@ function AddModal({onClose,onAdd}){
     if(!q.trim())return;
     setLoading(true);setSel(null);
     const r=await tmdbSearch(q,mtype);
-    setResults(r);setLoading(false);
+    // For movies in watch mode, sort to prefer upcoming titles
+    const sorted=intent==='watch'&&mtype==='movie'
+      ?[...r].sort((a,b)=>{
+          const af=a.date&&a.date>=TODAY()?1:0;
+          const bf=b.date&&b.date>=TODAY()?1:0;
+          return bf-af;
+        })
+      :r;
+    setResults(sorted);setLoading(false);
   };
 
-  const handleAdd=()=>{
+  const handleAdd=async()=>{
     if(!sel&&!q.trim())return;
-    onAdd({
-      id:uid(),type:mtype,category:cat,
-      title:sel?sel.title:q.trim(),
-      streaming:svc?[svc]:[],streamingNote:sNote,
-      userDate:uDate,note:'',
-      tmdbFetched:!!sel,
-      poster:sel?.poster||null,
-      description:sel?.description||'',
-      tmdbDate:sel?.date||'',
-      tmdbId:sel?.tmdbId||null,
-    });
-    onClose();
+    setAdding(true);
+    const isRewatch=intent==='rewatch';
+    const title=sel?sel.title:q.trim();
+
+    // Auto-fetch streaming if not manually specified
+    let streaming=svc?[svc]:[];
+    if(!streaming.length&&sel?.tmdbId){
+      const pvs=await getProviders(sel.tmdbId,mtype);
+      if(pvs.length)streaming=pvs;
+    }
+
+    const base={
+      streaming,streamingNote:sNote,userDate:'',note:'',
+      tmdbFetched:!!sel,tvDetailsFetched:false,
+      poster:sel?.poster||null,description:sel?.description||'',
+      tmdbDate:sel?.date||'',tmdbId:sel?.tmdbId||null,
+      showKey:null,seasonNote:'',yearRange:'',inTheaters:false,autoCreated:false,
+    };
+
+    if(isRewatch){
+      let seasonNote='',yearRange='';
+      if(mtype==='tv'&&sel?.tmdbId){
+        const dets=await fetchTVDetails(sel.tmdbId);
+        if(dets){
+          const cur=dets.currentSeason;
+          const startYear=dets.firstAirDate?.slice(0,4)||'';
+          const endYear=cur?.date?.slice(0,4)||startYear;
+          seasonNote=dets.totalSeasons>1?`Season 1–${dets.totalSeasons}`:`Season ${dets.totalSeasons}`;
+          yearRange=startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear;
+          if(cur)base.tmdbDate=cur.date;
+          base.showKey=sel.tmdbId?showKey(sel.tmdbId):null;
+        }
+      }
+      onAdd({...base,id:uid(),type:mtype,category:'rewatch',title,seasonNote,yearRange,tvDetailsFetched:mtype==='tv'});
+    }else if(mtype==='movie'){
+      const cat=sel?.date&&sel.date>=TODAY()?'comingSoon':'released';
+      onAdd({...base,id:uid(),type:'movie',category:cat,title});
+    }else{
+      // TV — fetch season details and potentially create 2 cards
+      let cur=null,upc=null,sk=null;
+      if(sel?.tmdbId){
+        sk=showKey(sel.tmdbId);
+        const dets=await fetchTVDetails(sel.tmdbId);
+        if(dets){cur=dets.currentSeason;upc=dets.upcomingSeason;}
+        base.showKey=sk;base.tvDetailsFetched=true;
+      }
+      if(cur){
+        onAdd({...base,id:uid(),type:'tv',category:'released',title,
+          tmdbDate:cur.date,seasonNote:`Season ${cur.season}`});
+      }
+      if(upc){
+        onAdd({...base,id:uid(),type:'tv',category:'comingSoon',title,
+          tmdbDate:upc.date,seasonNote:`Season ${upc.season}`,streaming:[]});
+      }
+      if(!cur&&!upc){
+        onAdd({...base,id:uid(),type:'tv',category:'released',title});
+      }
+    }
+    setAdding(false);onClose();
   };
 
   return(
@@ -520,11 +606,14 @@ function AddModal({onClose,onAdd}){
             <option value="movie">Movie</option>
             <option value="tv">TV Show</option>
           </select>
-          <select className="msel" value={cat} onChange={e=>setCat(e.target.value)}>
-            <option value="released">Released</option>
-            <option value="comingSoon">Coming Soon</option>
-            <option value="rewatch">Rewatch</option>
-          </select>
+        </div>
+        <div className="intent-toggle" style={{marginBottom:12}}>
+          <button className={`intent-btn${intent==='watch'?' on':''}`} onClick={()=>setIntent('watch')}>
+            Want to Watch
+          </button>
+          <button className={`intent-btn${intent==='rewatch'?' on':''}`} onClick={()=>setIntent('rewatch')}>
+            Rewatch
+          </button>
         </div>
         <div className="row2" style={{marginBottom:12}}>
           <input ref={ref} className="minput" style={{marginBottom:0,flex:1}} placeholder="Search title…"
@@ -550,13 +639,12 @@ function AddModal({onClose,onAdd}){
             ))}
           </div>
         )}
-        <input className="minput" placeholder="Streaming (e.g. Netflix)" value={svc} onChange={e=>setSvc(e.target.value)}/>
-        <input className="minput" placeholder="Price note (e.g. $5.99)" value={sNote} onChange={e=>setSNote(e.target.value)}/>
-        <input className="minput" placeholder="Release date (e.g. 6/19/26 or TBD)" value={uDate} onChange={e=>setUDate(e.target.value)}/>
+        <input className="minput" placeholder="Streaming service (optional — auto-detected)" value={svc} onChange={e=>setSvc(e.target.value)}/>
+        <input className="minput" style={{marginBottom:0}} placeholder="Price note (e.g. $5.99)" value={sNote} onChange={e=>setSNote(e.target.value)}/>
         <div className="mactions">
           <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn-gold" onClick={handleAdd}>
-            {sel?`Add "${sel.title.slice(0,24)}${sel.title.length>24?'…':''}"` :'Add Item'}
+          <button className="btn btn-gold" onClick={handleAdd} disabled={adding}>
+            {adding?<span className="spinner"/>:sel?`Add "${sel.title.slice(0,22)}${sel.title.length>22?'…':''}"` :'Add Item'}
           </button>
         </div>
       </div>
@@ -568,7 +656,7 @@ function AddModal({onClose,onAdd}){
 function App(){
   const[items,setItems]=useState(()=>{
     try{
-      const s=localStorage.getItem('watchlist-v4');
+      const s=localStorage.getItem('watchlist-v5');
       if(s)return autoMove(JSON.parse(s));
     }catch{}
     return autoMove(DATA);
@@ -583,38 +671,49 @@ function App(){
   const[fetching,setFetching]=useState(false);
 
   useEffect(()=>{
-    try{localStorage.setItem('watchlist-v4',JSON.stringify(items));}catch{}
+    try{localStorage.setItem('watchlist-v5',JSON.stringify(items));}catch{}
   },[items]);
 
   useEffect(()=>{
     const needBasic=items.filter(i=>!i.tmdbFetched);
     const needTV=items.filter(i=>i.type==='tv'&&i.tmdbFetched&&!i.tvDetailsFetched&&i.tmdbId);
-    const total=needBasic.length+needTV.length;
-    if(!total)return;
-    setFetching(true);setTotal(total);setDone(0);
-    const mkTask=item=>async()=>{
-      const upd=await fetchItem(item);
+    const tot=needBasic.length+needTV.length;
+    if(!tot)return;
+    setFetching(true);setTotal(tot);setDone(0);
+
+    const applyUpdate=(id,upd)=>{
       setItems(prev=>{
-        const idx=prev.findIndex(x=>x.id===item.id);
+        const idx=prev.findIndex(x=>x.id===id);
         if(idx===-1)return prev;
-        const next=[...prev];next[idx]={...next[idx],...upd};return next;
-      });
-      setDone(n=>n+1);
-    };
-    const tvTask=item=>async()=>{
-      const dets=await fetchTVDetails(item.tmdbId);
-      setItems(prev=>{
-        const idx=prev.findIndex(x=>x.id===item.id);
-        if(idx===-1)return prev;
+        const{_companionCat,_companionEp,...clean}=upd;
         const next=[...prev];
-        const ep=dets?.nextSeason||dets?.lastSeason;
-        next[idx]={...next[idx],tvDetailsFetched:true,...(ep?{tmdbDate:ep.date,seasonNote:`Season ${ep.season}`}:{})};
+        next[idx]={...next[idx],...clean};
+        // Create companion card if needed and not already present
+        if(_companionCat&&_companionEp){
+          const sk=next[idx].showKey;
+          if(sk&&!prev.some(x=>x.showKey===sk&&x.category===_companionCat)){
+            next.push(makeCompanion(next[idx],_companionCat,_companionEp));
+          }
+        }
         return next;
       });
-      setDone(n=>n+1);
     };
-    const tasks=[...needBasic.map(mkTask),...needTV.map(tvTask)];
-    runQ(tasks,5).finally(()=>{setFetching(false);setItems(prev=>autoMove(prev));});
+
+    const basicTasks=needBasic.map(item=>async()=>{
+      const upd=await fetchItem(item);
+      applyUpdate(item.id,upd);
+      setDone(n=>n+1);
+    });
+
+    const tvTasks=needTV.map(item=>async()=>{
+      const dets=await fetchTVDetails(item.tmdbId);
+      const upd=applyTVDets(item,dets);
+      applyUpdate(item.id,upd);
+      setDone(n=>n+1);
+    });
+
+    runQ([...basicTasks,...tvTasks],5)
+      .finally(()=>{setFetching(false);setItems(prev=>autoMove(prev));});
   },[]);// eslint-disable-line
 
   const removeItem=useCallback(id=>{
@@ -634,7 +733,7 @@ function App(){
   const counts=useMemo(()=>{
     const mv=items.filter(i=>i.type==='movie');
     const tv=items.filter(i=>i.type==='tv');
-    const sc=(arr)=>({
+    const sc=arr=>({
       released:arr.filter(i=>i.category==='released').length,
       comingSoon:arr.filter(i=>i.category==='comingSoon').length,
       rewatch:arr.filter(i=>i.category==='rewatch').length,
@@ -650,7 +749,6 @@ function App(){
 
   const pct=total>0?(done/total)*100:100;
   const tc=counts[tab];
-
   const SECTIONS=[
     ['released','Released',tc.released],
     ['comingSoon','Coming Soon',tc.comingSoon],
