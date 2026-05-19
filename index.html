@@ -97,6 +97,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
 .badge{border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.3px;padding:2px 5px;white-space:nowrap}
 .cdesc{color:var(--text2);font-size:10px;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.cseason{color:var(--text2);font-size:10px;font-style:italic;margin-bottom:3px}
+.dm-season{color:var(--text2);font-size:12px;font-style:italic;margin-bottom:6px}
 .in-theaters-tag{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(135deg,#b52a2a,#e03c3c);color:#fff;font-size:8px;font-weight:800;letter-spacing:.8px;padding:4px 6px;text-align:center;text-transform:uppercase}
 
 /* MODAL BASE */
@@ -307,14 +309,43 @@ async function getProviders(tmdbId,type){
   }catch{return[];}
 }
 
+async function fetchTVDetails(tmdbId){
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}`,{headers:{'Authorization':`Bearer ${TOKEN}`}});
+    if(!r.ok)return null;
+    const d=await r.json();
+    const next=d.next_episode_to_air;
+    const last=d.last_episode_to_air;
+    return{
+      nextSeason:next?{date:next.air_date,season:next.season_number}:null,
+      lastSeason:last?{date:last.air_date,season:last.season_number}:null,
+    };
+  }catch{return null;}
+}
+
 async function fetchItem(item){
   const results=await tmdbSearch(item.title,item.type);
-  const r=results[0]||null;
-  if(!r)return{tmdbFetched:true};
+  // For Coming Soon, prefer results with a future release date
+  let r=null;
+  if(item.category==='comingSoon'&&results.length>1){
+    const today=new Date().toISOString().slice(0,10);
+    r=results.find(x=>x.date&&x.date>=today)||results[0];
+  }else{
+    r=results[0]||null;
+  }
+  if(!r)return{tmdbFetched:true,tvDetailsFetched:item.type==='tv'};
   const update={poster:r.poster,description:r.description,tmdbDate:r.date,tmdbId:r.tmdbId,tmdbFetched:true};
   if(!item.streaming||!item.streaming.length){
     const pvs=await getProviders(r.tmdbId,item.type);
     if(pvs.length)update.streaming=pvs;
+  }
+  if(item.type==='tv'){
+    const dets=await fetchTVDetails(r.tmdbId);
+    if(dets){
+      const ep=dets.nextSeason||dets.lastSeason;
+      if(ep){update.tmdbDate=ep.date;update.seasonNote=`Season ${ep.season}`;}
+    }
+    update.tvDetailsFetched=true;
   }
   return update;
 }
@@ -354,7 +385,7 @@ function autoMove(items){
   const now=Date.now(),DAYS=45;
   return items.map(i=>{
     if(i.category!=='comingSoon')return i;
-    const d=parseDate(i.userDate);
+    const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
     if(!d||d.getTime()>now)return i;
     return{...i,category:'released',inTheaters:(now-d.getTime())/86400000<=DAYS};
   });
@@ -369,7 +400,7 @@ function formatDate(item){
 }
 
 function sortedItems(arr,sec){
-  const ms=i=>{const d=parseDate(i.userDate)||parseDate(i.tmdbDate);return d?d.getTime():null;};
+  const ms=i=>{const d=parseDate(i.tmdbDate)||parseDate(i.userDate);return d?d.getTime():null;};
   return[...arr].sort((a,b)=>{
     const da=ms(a),db=ms(b);
     if(da==null&&db==null)return 0;
@@ -398,6 +429,7 @@ function Card({item,onTap}){
       </div>
       <div className="cbody">
         <div className="ctitle">{item.title}</div>
+        {item.seasonNote&&<div className="cseason">{item.seasonNote}</div>}
         {date&&<div className="cdate">{date}</div>}
         {item.streaming&&item.streaming.length>0&&(
           <div className="badges">
@@ -423,6 +455,7 @@ function DetailModal({item,onClose,onWatched,onRemove}){
           }
           <div className="dm-info">
             <div className="dm-title">{item.title}</div>
+            {item.seasonNote&&<div className="dm-season">{item.seasonNote}</div>}
             {date&&<div className="dm-date">{date}</div>}
             <div className="dm-badges">
               {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
@@ -554,10 +587,12 @@ function App(){
   },[items]);
 
   useEffect(()=>{
-    const need=items.filter(i=>!i.tmdbFetched);
-    if(!need.length)return;
-    setFetching(true);setTotal(need.length);setDone(0);
-    const tasks=need.map(item=>async()=>{
+    const needBasic=items.filter(i=>!i.tmdbFetched);
+    const needTV=items.filter(i=>i.type==='tv'&&i.tmdbFetched&&!i.tvDetailsFetched&&i.tmdbId);
+    const total=needBasic.length+needTV.length;
+    if(!total)return;
+    setFetching(true);setTotal(total);setDone(0);
+    const mkTask=item=>async()=>{
       const upd=await fetchItem(item);
       setItems(prev=>{
         const idx=prev.findIndex(x=>x.id===item.id);
@@ -565,7 +600,20 @@ function App(){
         const next=[...prev];next[idx]={...next[idx],...upd};return next;
       });
       setDone(n=>n+1);
-    });
+    };
+    const tvTask=item=>async()=>{
+      const dets=await fetchTVDetails(item.tmdbId);
+      setItems(prev=>{
+        const idx=prev.findIndex(x=>x.id===item.id);
+        if(idx===-1)return prev;
+        const next=[...prev];
+        const ep=dets?.nextSeason||dets?.lastSeason;
+        next[idx]={...next[idx],tvDetailsFetched:true,...(ep?{tmdbDate:ep.date,seasonNote:`Season ${ep.season}`}:{})};
+        return next;
+      });
+      setDone(n=>n+1);
+    };
+    const tasks=[...needBasic.map(mkTask),...needTV.map(tvTask)];
     runQ(tasks,5).finally(()=>{setFetching(false);setItems(prev=>autoMove(prev));});
   },[]);// eslint-disable-line
 
