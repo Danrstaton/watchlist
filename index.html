@@ -67,7 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .tab:hover:not(.on){color:var(--text)}
 .seg-wrap{padding:10px 0 12px}
 .seg{background:rgba(255,255,255,.07);border-radius:11px;display:flex;padding:3px;gap:2px}
-.seg-btn{background:none;border:none;border-radius:9px;color:var(--text2);cursor:pointer;flex:1;font-size:13px;font-weight:600;padding:8px 6px;transition:all .2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.seg-btn{background:none;border:none;border-radius:9px;color:var(--text2);cursor:pointer;flex:1;font-size:12px;font-weight:600;padding:8px 4px;transition:all .2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .seg-btn.on{background:var(--card2);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.5)}
 .seg-cnt{font-size:11px;font-weight:400;opacity:.65;margin-left:3px}
 .main{padding:14px}
@@ -128,16 +128,16 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .tv-sp-title{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
 .tv-sp-upcoming{display:flex;gap:8px}
 /* Epic detail modal */
-.dm-hero-wrap{border-radius:20px 20px 0 0;margin:-20px -20px 0;overflow:hidden;position:relative}
-@media(min-width:500px){.dm-hero-wrap{border-radius:16px 16px 0 0}}
-.dm-hero-img{display:block;height:300px;object-fit:cover;width:100%}
-.dm-hero-ph{align-items:center;background:var(--card2);display:flex;font-size:72px;height:220px;justify-content:center}
-.dm-hero-scrim{background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 30%,rgba(24,24,42,.98) 85%);inset:0;position:absolute}
-.dm-hero-drag{background:rgba(255,255,255,.35);border-radius:2px;height:4px;left:50%;position:absolute;top:10px;transform:translateX(-50%);width:36px}
-.dm-hero-info{bottom:14px;left:16px;position:absolute;right:16px}
-.dm-hero-title{font-size:21px;font-weight:800;line-height:1.2;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.9)}
-.dm-hero-meta{align-items:center;display:flex;flex-wrap:wrap;gap:5px}
-.dm-content{padding:14px 20px 20px}
+.dm-outer{align-items:center;display:flex;flex-direction:column;width:100%}
+@media(min-width:500px){.dm-outer{max-width:480px}}
+.dm-poster-float{border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.55);flex-shrink:0;margin-bottom:-24px;overflow:hidden;width:150px;z-index:1}
+.dm-poster-float img{display:block;width:100%}
+.dm-poster-ph-lg{align-items:center;background:var(--card2);display:flex;font-size:56px;height:225px;justify-content:center;width:150px}
+.dm-sheet{background:var(--card);border-radius:20px 20px 0 0;max-height:82vh;overflow-y:auto;padding:38px 20px 20px;position:relative;width:100%}
+@media(min-width:500px){.dm-sheet{border-radius:16px;max-height:78vh}}
+.dm-sheet-drag{background:rgba(255,255,255,.2);border-radius:2px;height:4px;left:50%;position:absolute;top:10px;transform:translateX(-50%);width:36px}
+.dm-sheet-title{font-size:20px;font-weight:800;line-height:1.25;margin-bottom:6px;text-align:center}
+.dm-sheet-meta{align-items:center;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px}
 /* Season checkboxes */
 .season-label{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase}
 .season-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
@@ -154,6 +154,47 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .nsz-date{color:var(--text2);font-size:11px;margin-top:2px}
 .move-btn{background:rgba(229,178,93,.1);border:1px solid var(--accent);border-radius:8px;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;padding:11px 8px;flex:1;text-align:center;-webkit-tap-highlight-color:transparent;transition:background .2s}
 .move-btn:hover{background:rgba(229,178,93,.2)}
+.watch-links{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.watch-link{border-radius:10px;display:block;font-size:14px;font-weight:700;padding:13px 16px;text-align:center;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.watch-link:active{opacity:.75}
+/* Favorites */
+.fav-view{padding:0}
+.fav-row{align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:12px;margin-bottom:8px;padding:10px 12px;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.fav-row:hover{background:var(--card2)}
+.fav-row:active{opacity:.85}
+.fav-thumb{border-radius:6px;flex-shrink:0;height:54px;object-fit:cover;width:36px}
+.fav-thumb-ph{align-items:center;background:var(--card2);display:flex;font-size:18px;justify-content:center}
+.fav-row-info{flex:1;min-width:0}
+.fav-row-title{font-size:13px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fav-row-year{color:var(--accent);font-size:11px;font-weight:500;margin-top:2px}
+.genre-section{margin-bottom:14px}
+.genre-hdr{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;display:flex;font-size:14px;font-weight:700;gap:8px;padding:10px 14px;width:100%;-webkit-tap-highlight-color:transparent;transition:background .15s;margin-bottom:6px;text-align:left}
+.genre-hdr:hover{background:rgba(255,255,255,.08)}
+.genre-name{flex:1}
+.genre-cnt{color:var(--text2);font-size:12px;font-weight:400}
+.genre-arrow{color:var(--text2);font-size:11px}
+.genre-items{padding:0 2px}
+/* Best Picture */
+.bp-section{background:linear-gradient(135deg,#1a1025 0%,#0d0d16 100%);border:1px solid rgba(229,178,93,.25);border-radius:14px;margin-bottom:20px;overflow:hidden}
+.bp-header{align-items:center;background:linear-gradient(90deg,rgba(229,178,93,.18),transparent);border-bottom:1px solid rgba(229,178,93,.15);color:var(--accent);display:flex;font-size:12px;font-weight:800;gap:8px;letter-spacing:.9px;padding:12px 16px;text-transform:uppercase}
+.bp-list{}
+.bp-row{align-items:center;border-bottom:1px solid rgba(255,255,255,.04);cursor:default;display:flex;gap:12px;min-height:46px;padding:8px 16px;transition:background .15s}
+.bp-row.bp-filled{cursor:pointer}
+.bp-row.bp-filled:hover{background:rgba(229,178,93,.07)}
+.bp-row.bp-filled:active{opacity:.8}
+.bp-row:last-child{border-bottom:none}
+.bp-year{color:var(--accent);font-size:13px;font-weight:700;min-width:38px}
+.bp-title{color:var(--text);flex:1;font-size:13px;font-weight:500}
+.bp-empty{color:var(--text2);font-style:italic;font-weight:400}
+.bp-thumb{border-radius:4px;flex-shrink:0;height:36px;object-fit:cover;width:24px}
+/* Star */
+.star-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:22px;line-height:1;padding:2px 6px;-webkit-tap-highlight-color:transparent;transition:color .15s,transform .2s}
+.star-btn.on{color:#f5c518}
+.star-btn:active{transform:scale(.85)}
+/* Genre select in fav detail */
+.fav-genre-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.crown-toggle{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-bottom:14px;padding:11px 14px;-webkit-tap-highlight-color:transparent;transition:border-color .2s}
+.crown-toggle.on{background:rgba(245,197,24,.08);border-color:#f5c518}
 </style>
 </head>
 <body>
@@ -164,6 +205,19 @@ const{useState,useEffect,useCallback,useRef,useMemo}=React;
 const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjVhMWIxMzA0ZjNjMzA1NjVhMGMxNGQxZDI2MzM1NSIsIm5iZiI6MTc3OTA1ODQxNS4yMDQsInN1YiI6IjZhMGE0NmVmMjc0YmRmZjdkNzFlNzJiMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.HM8iWYDC4djozp5-2lEjq1pi1Gy7NYaaF7kZ0W1I8N4';
 const IMG='https://image.tmdb.org/t/p/w342';
 const TODAY=()=>new Date().toISOString().slice(0,10);
+
+const SVC_LINKS={
+  'Netflix':    t=>`https://www.netflix.com/search?q=${encodeURIComponent(t)}`,
+  'Prime':      t=>`https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${encodeURIComponent(t)}`,
+  'Disney+':    t=>`https://www.disneyplus.com/search/${encodeURIComponent(t)}`,
+  'Max':        t=>`https://www.max.com/search?q=${encodeURIComponent(t)}`,
+  'HBO':        t=>`https://www.max.com/search?q=${encodeURIComponent(t)}`,
+  'Apple':      t=>`https://tv.apple.com/search?term=${encodeURIComponent(t)}`,
+  'Peacock':    t=>`https://www.peacocktv.com/watch/free/search/${encodeURIComponent(t)}`,
+  'Hulu':       t=>`https://www.hulu.com/search?q=${encodeURIComponent(t)}`,
+  'Paramount+': t=>`https://www.paramountplus.com/search/${encodeURIComponent(t)}/`,
+  'YouTube':    t=>`https://www.youtube.com/results?search_query=${encodeURIComponent(t)}`,
+};
 
 const SVC={
   'Netflix':   {bg:'#e50914',fg:'#fff'},
@@ -185,6 +239,9 @@ const PMAP={
   'YouTube Premium':'YouTube','YouTube':'YouTube',
 };
 
+const GENRES=['Action / Adventure','Animated','Comic Book Live-Action','Comedy','Drama / Mystery','Fantasy','Horror / Suspense','Musical','Romance','Sci-Fi','Video Game Movies'];
+const BP_START=2015;
+
 let _n=0;
 const uid=()=>`i${++_n}${Math.random().toString(36).slice(2,5)}`;
 const showKey=id=>`tv-${id}`;
@@ -196,7 +253,9 @@ const mk=(type,cat,title,svc=[],sNote='')=>({
   seasonNote:'',yearRange:'',inTheaters:false,autoCreated:false,
   totalSeasons:null,watchedSeasons:[],
   newSeasonAnnounced:false,newSeasonDate:'',firstAirDate:'',
+  favorite:false,genre:'',isCrown:false,bestPictureYear:null,
 });
+const mkf=(type,title,genre,bp=null)=>({...mk(type,'favorite',title),favorite:true,genre:genre||'',bestPictureYear:bp||null});
 
 const DATA=[
   // MOVIES — RELEASED
@@ -266,8 +325,8 @@ const DATA=[
   mk('tv','released','Taskmaster',['YouTube']),
   mk('tv','released','Overcompensating',['Prime']),
   mk('tv','released','Saturday Night Live',['Peacock']),
-  mk('tv','released',"Clarkson's Farm",['Prime']),
-  mk('tv','released','Abbott Elementary',['Disney+']),
+  {...mk('tv','released',"Clarkson's Farm",['Prime']),favorite:true},
+  {...mk('tv','released','Abbott Elementary',['Disney+']),favorite:true},
   mk('tv','released','Hacks',['Max']),
   mk('tv','released','Mr. & Mrs. Smith',['Prime']),
   mk('tv','released','Shrinking',['Apple']),
@@ -275,22 +334,136 @@ const DATA=[
   mk('tv','released','The Wright Plan',['Max']),
   mk('tv','released','Too Much',['Netflix']),
   // TV — COMING SOON
-  mk('tv','comingSoon','House of the Dragon',['Max']),
-  mk('tv','comingSoon','The Last of Us',['Max']),
+  {...mk('tv','comingSoon','House of the Dragon',['Max']),favorite:true},
+  {...mk('tv','comingSoon','The Last of Us',['Max']),favorite:true},
   mk('tv','comingSoon','Severance',['Apple']),
   mk('tv','comingSoon','Boots',['Netflix']),
   mk('tv','comingSoon','God of War',['Prime']),
   mk('tv','comingSoon','Tomb Raider',['Prime']),
   // TV — REWATCH
-  mk('tv','rewatch','The Office',['Peacock']),
-  mk('tv','rewatch','Parks and Recreation',['Peacock']),
+  {...mk('tv','rewatch','The Office',['Peacock']),favorite:true},
+  {...mk('tv','rewatch','Parks and Recreation',['Peacock']),favorite:true},
   mk('tv','rewatch','Modern Family',['Peacock']),
   mk('tv','rewatch','Family Guy',['Prime']),
   mk('tv','rewatch','Nathan for You',['Max']),
   mk('tv','rewatch','Strangers with Candy',['Prime']),
   mk('tv','rewatch','Summer Heights High',['Prime']),
   mk('tv','rewatch',"It's Always Sunny in Philadelphia",['Peacock']),
-  mk('tv','rewatch','The Great British Bake Off',['Netflix']),
+  {...mk('tv','rewatch','The Great British Bake Off',['Netflix']),favorite:true},
+];
+
+const FAVS_DATA=[
+  // ── Action / Adventure ──
+  mkf('movie','John Wick Series','Action / Adventure'),
+  mkf('movie','Mission Impossible Series','Action / Adventure'),
+  mkf('movie','Top Gun: Maverick','Action / Adventure',2022),
+  mkf('movie','Mission Impossible: Fallout','Action / Adventure',2018),
+  mkf('movie','The Revenant','Action / Adventure'),
+  mkf('movie','Kingsman: The Secret Service','Action / Adventure'),
+  mkf('movie','Inception','Action / Adventure'),
+  mkf('movie','No Country for Old Men','Action / Adventure'),
+  // ── Comic Book Live-Action ──
+  mkf('movie','Spider-Man: No Way Home','Comic Book Live-Action',2021),
+  mkf('movie','Spider-Man: Far From Home','Comic Book Live-Action'),
+  mkf('movie','Joker','Comic Book Live-Action'),
+  mkf('movie','Avengers: Endgame','Comic Book Live-Action',2019),
+  mkf('movie','Avengers: Infinity War','Comic Book Live-Action'),
+  mkf('movie','Black Panther','Comic Book Live-Action'),
+  mkf('movie','Spider-Man: Homecoming','Comic Book Live-Action'),
+  mkf('movie','The Avengers','Comic Book Live-Action'),
+  mkf('movie','Iron Man','Comic Book Live-Action'),
+  mkf('movie','The Dark Knight','Comic Book Live-Action'),
+  // ── Comedy ──
+  mkf('movie','Barbie','Comedy',2023),
+  mkf('movie','Barb and Star Go to Vista Del Mar','Comedy'),
+  mkf('movie','Bad Moms','Comedy'),
+  mkf('movie','The Heat','Comedy'),
+  mkf('movie','The Devil Wears Prada','Comedy'),
+  mkf('movie','Mean Girls','Comedy'),
+  mkf('movie','Elf','Comedy'),
+  mkf('movie','Freaky Friday','Comedy'),
+  mkf('movie','What a Girl Wants','Comedy'),
+  mkf('movie','Bowfinger','Comedy'),
+  mkf('movie','Dirty Rotten Scoundrels','Comedy'),
+  mkf('movie','The Jerk','Comedy'),
+  // ── Drama / Mystery ──
+  mkf('movie','Glass Onion: A Knives Out Mystery','Drama / Mystery'),
+  mkf('movie','Everything Everywhere All at Once','Drama / Mystery'),
+  mkf('movie','Knives Out','Drama / Mystery'),
+  mkf('movie','Parasite','Drama / Mystery'),
+  mkf('movie','The Farewell','Drama / Mystery'),
+  mkf('movie','Moonlight','Drama / Mystery'),
+  mkf('movie','Steve Jobs','Drama / Mystery',2015),
+  // ── Romance ──
+  mkf('movie','Call Me by Your Name','Romance',2017),
+  mkf('movie','Brokeback Mountain','Romance'),
+  mkf('movie',"But I'm a Cheerleader",'Romance'),
+  // ── Musical ──
+  mkf('movie','Wicked: For Good','Musical',2025),
+  mkf('movie','Wicked','Musical',2024),
+  mkf('movie','A Star Is Born','Musical'),
+  mkf('movie','La La Land','Musical',2016),
+  mkf('movie','Whiplash','Musical'),
+  mkf('movie','The Blues Brothers','Musical'),
+  // ── Sci-Fi ──
+  mkf('movie','Star Wars','Sci-Fi'),
+  mkf('movie','Dune','Sci-Fi'),
+  mkf('movie','Interstellar','Sci-Fi'),
+  mkf('movie','Gravity','Sci-Fi'),
+  mkf('movie','2001: A Space Odyssey','Sci-Fi'),
+  // ── Fantasy ──
+  mkf('movie','Rise of the Planet of the Apes','Fantasy'),
+  mkf('movie','The Hunger Games','Fantasy'),
+  mkf('movie','Harry Potter and the Sorcerer\'s Stone','Fantasy'),
+  mkf('movie','The Lord of the Rings: The Fellowship of the Ring','Fantasy'),
+  // ── Animated ──
+  mkf('movie','Inside Out 2','Animated'),
+  mkf('movie','Spider-Man: Into the Spider-Verse','Animated'),
+  mkf('movie','Soul','Animated',2020),
+  mkf('movie','Toy Story','Animated'),
+  mkf('movie','Coco','Animated'),
+  mkf('movie','Inside Out','Animated'),
+  mkf('movie','Up','Animated'),
+  mkf('movie','WALL·E','Animated'),
+  mkf('movie','Ratatouille','Animated'),
+  mkf('movie','The Incredibles','Animated'),
+  mkf('movie','Shrek 2','Animated'),
+  mkf('movie','Finding Nemo','Animated'),
+  mkf('movie','Mulan','Animated'),
+  mkf('movie','The Lion King','Animated'),
+  mkf('movie','Aladdin','Animated'),
+  // ── Horror / Suspense ──
+  mkf('movie','A Quiet Place','Horror / Suspense'),
+  mkf('movie','In a Violent Nature','Horror / Suspense'),
+  mkf('movie','M3GAN','Horror / Suspense'),
+  mkf('movie','Nope','Horror / Suspense'),
+  mkf('movie','Us','Horror / Suspense'),
+  mkf('movie','Get Out','Horror / Suspense'),
+  mkf('movie',"Don't Breathe",'Horror / Suspense'),
+  mkf('movie','Hush','Horror / Suspense'),
+  // ── Video Game Movies ──
+  mkf('movie','The Super Mario Galaxy Movie','Video Game Movies',2026),
+  mkf('movie','Sonic the Hedgehog','Video Game Movies'),
+  mkf('movie','The Super Mario Bros. Movie','Video Game Movies'),
+  mkf('movie','Tomb Raider','Video Game Movies'),
+  // ── TV favorites (not in main watchlist) ──
+  mkf('tv','Survivor',''),
+  mkf('tv','The Traitors',''),
+  mkf('tv','The Rehearsal',''),
+  mkf('tv','Love on the Spectrum',''),
+  mkf('tv','Queer Eye',''),
+  mkf('tv','Andor',''),
+  mkf('tv','Agatha All Along',''),
+  mkf('tv','What We Do in the Shadows',''),
+  mkf('tv','Top Gear',''),
+  mkf('tv','The Mandalorian',''),
+  mkf('tv','Grace and Frankie',''),
+  mkf('tv','WandaVision',''),
+  mkf('tv',"Schitt's Creek",''),
+  mkf('tv','The Good Place',''),
+  mkf('tv','Reba',''),
+  mkf('tv','Malcolm in the Middle',''),
+  mkf('tv','Friends',''),
 ];
 
 /* ── TMDB API ── */
@@ -356,7 +529,7 @@ function buildTVDisplay(dets,cat){
     const n=totalSeasons||1;
     return{seasonNote:n>1?`Season 1–${n}`:'Season 1',yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
   }
-  if(cat==='released'){
+  if(cat==='released'||cat==='favorite'){
     const n=releasedSeasons||totalSeasons||null;
     return{seasonNote:n>1?`Season 1–${n}`:(n===1?'Season 1':''),yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
   }
@@ -429,10 +602,21 @@ function parseDate(s){
 function autoMove(items){
   const now=Date.now(),DAYS=45;
   return items.map(i=>{
-    if(i.category!=='comingSoon')return i;
-    const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
-    if(!d||d.getTime()>now)return i;
-    return{...i,category:'released',inTheaters:(now-d.getTime())/86400000<=DAYS};
+    // TV shows are never in theaters
+    if(i.type==='tv') return i.inTheaters?{...i,inTheaters:false}:i;
+    if(i.category==='comingSoon'){
+      const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
+      if(!d||d.getTime()>now)return i;
+      return{...i,category:'released',inTheaters:(now-d.getTime())/86400000<=DAYS};
+    }
+    if(i.category==='released'){
+      // Re-evaluate inTheaters so newly-released movies pick up the tag
+      const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
+      const days=d?(now-d.getTime())/86400000:null;
+      const should=days!==null&&days>=0&&days<=DAYS;
+      return should===i.inTheaters?i:{...i,inTheaters:should};
+    }
+    return i;
   });
 }
 
@@ -516,6 +700,205 @@ function Card({item,onTap}){
           </div>
         )}
         {item.description&&<div className="cdesc">{item.description}</div>}
+      </div>
+    </div>
+  );
+}
+
+function FavRow({item,onTap}){
+  const yr=item.yearRange||(item.tmdbDate||item.userDate||'').slice(0,4);
+  const seasons=item.type==='tv'&&item.totalSeasons?`${item.totalSeasons} season${item.totalSeasons>1?'s':''}`:null;
+  const sub=[yr,seasons].filter(Boolean).join(' · ');
+  return(
+    <div className="fav-row" onClick={()=>onTap(item)}>
+      {item.poster
+        ?<img className="fav-thumb" src={item.poster} alt={item.title} loading="lazy"/>
+        :<div className="fav-thumb fav-thumb-ph">🍿</div>
+      }
+      <div className="fav-row-info">
+        <div className="fav-row-title">{item.isCrown?'👑 ':''}{item.title}</div>
+        {sub&&<div className="fav-row-year">{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+function GenreSection({genre,items,onTap}){
+  const[open,setOpen]=useState(true);
+  if(!items.length)return null;
+  return(
+    <div className="genre-section">
+      <button className="genre-hdr" onClick={()=>setOpen(v=>!v)}>
+        <span className="genre-name">{genre}</span>
+        <span className="genre-cnt">{items.length}</span>
+        <span className="genre-arrow">{open?'▾':'▸'}</span>
+      </button>
+      {open&&<div className="genre-items">{items.map(i=><FavRow key={i.id} item={i} onTap={onTap}/>)}</div>}
+    </div>
+  );
+}
+
+function BestPictureSection({items,onTap}){
+  const curYear=new Date().getFullYear();
+  const years=Array.from({length:curYear-BP_START+1},(_,i)=>curYear-i);
+  const byYear={};
+  items.forEach(i=>{if(i.bestPictureYear)byYear[i.bestPictureYear]=i;});
+  return(
+    <div className="bp-section">
+      <div className="bp-header">🏆 My Best Picture by Year</div>
+      <div className="bp-list">
+        {years.map(yr=>{
+          const m=byYear[yr];
+          return(
+            <div key={yr} className={`bp-row${m?' bp-filled':''}`} onClick={()=>m&&onTap(m)}>
+              <span className="bp-year">{yr}</span>
+              {m?(
+                <>
+                  {m.poster
+                    ?<img className="bp-thumb" src={m.poster} alt=""/>
+                    :<div className="bp-thumb" style={{background:'var(--card2)',borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10}}>🍿</div>
+                  }
+                  <span className="bp-title">{m.title}</span>
+                </>
+              ):(
+                <span className="bp-title bp-empty">—</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function FavoritesView({items,tab,onTap}){
+  const favs=items.filter(i=>i.type===tab&&i.favorite);
+  if(tab==='tv'){
+    const sorted=[...favs].sort((a,b)=>{
+      const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
+      const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
+      if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
+      return db.getTime()-da.getTime();
+    });
+    return(
+      <div className="fav-view">
+        {!sorted.length&&<div className="empty">No TV favorites yet — tap ⭐ in a show's detail</div>}
+        {sorted.map(i=><FavRow key={i.id} item={i} onTap={onTap}/>)}
+      </div>
+    );
+  }
+  const bpMovies=favs.filter(i=>i.bestPictureYear);
+  return(
+    <div className="fav-view">
+      {!favs.length&&<div className="empty">No movie favorites yet — tap ⭐ in a movie's detail</div>}
+      {favs.length>0&&(
+        <>
+          <BestPictureSection items={bpMovies} onTap={onTap}/>
+          {GENRES.map(g=>{
+            const gi=favs.filter(i=>i.genre===g).sort((a,b)=>{
+              const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
+              const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
+              if(!da&&!db)return a.title.localeCompare(b.title);
+              if(!da)return 1;if(!db)return-1;
+              return db.getTime()-da.getTime();
+            });
+            return<GenreSection key={g} genre={g} items={gi} onTap={onTap}/>;
+          })}
+          {(()=>{
+            const unc=favs.filter(i=>!i.genre).sort((a,b)=>{
+              const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
+              const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
+              if(!da&&!db)return a.title.localeCompare(b.title);
+              if(!da)return 1;if(!db)return-1;
+              return db.getTime()-da.getTime();
+            });
+            return unc.length?<GenreSection genre="Uncategorized" items={unc} onTap={onTap}/>:null;
+          })()}
+        </>
+      )}
+    </div>
+  );
+}
+
+function FavoriteDetailModal({item,onClose,onRemove,onUpdateItem}){
+  const[genre,setGenre]=useState(item.genre||'');
+  const[isCrown,setIsCrown]=useState(item.isCrown||false);
+  const[bpYear,setBpYear]=useState(item.bestPictureYear||'');
+  const curYear=new Date().getFullYear();
+  const years=Array.from({length:curYear-BP_START+1},(_,i)=>curYear-i);
+
+  const upd=(patch)=>onUpdateItem(item.id,patch);
+
+  return(
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="dm-outer" onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="dm-poster-float">
+          {item.poster?<img src={item.poster} alt={item.title}/>:<div className="dm-poster-ph-lg">🍿</div>}
+        </div>
+        <div className="dm-sheet">
+          <div className="dm-sheet-drag"/>
+          <div className="dm-sheet-title">{item.isCrown?'👑 ':''}{item.title}</div>
+          <div className="dm-sheet-meta">
+            {(item.yearRange||(item.tmdbDate||'').slice(0,4))&&(
+              <span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>
+                {item.yearRange||(item.tmdbDate||'').slice(0,4)}
+              </span>
+            )}
+          </div>
+          {item.streaming&&item.streaming.length>0&&(
+            <div className="watch-links">
+              {item.streaming.map(svc=>{
+                const url=SVC_LINKS[svc]?.(item.title);
+                const s=SVC[svc]||{bg:'#444',fg:'#fff'};
+                return url?(
+                  <a key={svc} className="watch-link" href={url} target="_blank" rel="noopener noreferrer"
+                     style={{background:s.bg,color:s.fg}}
+                     onClick={e=>e.stopPropagation()}>
+                    Watch on {svc}
+                  </a>
+                ):null;
+              })}
+            </div>
+          )}
+          {item.description&&<p className="dm-desc">{item.description}</p>}
+
+          {item.type==='movie'&&(
+            <>
+              <div style={{marginBottom:10}}>
+                <div className="season-label">Genre</div>
+                <select className="msel" value={genre} onChange={e=>{setGenre(e.target.value);upd({genre:e.target.value});}}>
+                  <option value="">— None —</option>
+                  {GENRES.map(g=><option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div className="season-label">My Best Picture pick for year</div>
+                <select className="msel" value={bpYear} onChange={e=>{const y=e.target.value?Number(e.target.value):null;setBpYear(y||'');upd({bestPictureYear:y});}}>
+                  <option value="">— None —</option>
+                  {years.map(y=><option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <div className={`crown-toggle${isCrown?' on':''}`} onClick={()=>{const v=!isCrown;setIsCrown(v);upd({isCrown:v});}}>
+                <span style={{fontSize:20}}>{isCrown?'👑':'○'}</span>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:isCrown?'#f5c518':'var(--text)'}}>Crown pick in genre</div>
+                  <div style={{fontSize:11,color:'var(--text2)',marginTop:2}}>Mark as your top film in this genre</div>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="dm-actions">
+            <button className="btn" onClick={onClose}>Close</button>
+            <button className="btn btn-danger" onClick={()=>{
+              if(item.category==='favorite') onRemove(item.id);
+              else{upd({favorite:false,isCrown:false,bestPictureYear:null});onClose();}
+            }}>Unfavorite</button>
+            {item.category!=='favorite'&&item.type==='movie'&&(
+              <button className="move-btn" onClick={()=>{upd({category:'rewatch'});onClose();}}>Add to Rewatch</button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -609,22 +992,41 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
 
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal" style={{padding:0}}>
-        <div className="dm-hero-wrap">
-          {item.poster?<img className="dm-hero-img" src={item.poster} alt={item.title}/>:<div className="dm-hero-ph">🍿</div>}
-          <div className="dm-hero-scrim"/>
-          <div className="dm-hero-drag"/>
-          <div className="dm-hero-info">
-            <div className="dm-hero-title">{item.title}</div>
-            <div className="dm-hero-meta">
-              {heroSub&&<span style={{color:'rgba(255,255,255,.8)',fontSize:12}}>{heroSub}</span>}
-              {date&&<span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>{date}</span>}
-              {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
-              {item.streaming&&item.streaming.map(s=><Badge key={s} svc={s} note={item.streamingNote}/>)}
-            </div>
-          </div>
+      <div className="dm-outer" onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="dm-poster-float">
+          {item.poster
+            ?<img src={item.poster} alt={item.title}/>
+            :<div className="dm-poster-ph-lg">🍿</div>
+          }
         </div>
-        <div className="dm-content">
+        <div className="dm-sheet">
+          <div className="dm-sheet-drag"/>
+          <div className="dm-sheet-title">{item.title}</div>
+          <div className="dm-sheet-meta">
+            {heroSub&&<span style={{color:'var(--text2)',fontSize:12}}>{heroSub}</span>}
+            {date&&<span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>{date}</span>}
+            {item.inTheaters&&<span className="badge" style={{background:'linear-gradient(135deg,#b52a2a,#e03c3c)',color:'#fff'}}>🎬 In Theaters</span>}
+            <button className={`star-btn${item.favorite?' on':''}`}
+              title={item.favorite?'Remove from favorites':'Add to favorites'}
+              onClick={e=>{e.stopPropagation();onUpdateItem(item.id,{favorite:!item.favorite});}}>
+              {item.favorite?'⭐':'☆'}
+            </button>
+          </div>
+          {item.streaming&&item.streaming.length>0&&(
+            <div className="watch-links">
+              {item.streaming.map(svc=>{
+                const url=SVC_LINKS[svc]?.(item.title);
+                const s=SVC[svc]||{bg:'#444',fg:'#fff'};
+                return url?(
+                  <a key={svc} className="watch-link" href={url} target="_blank" rel="noopener noreferrer"
+                     style={{background:s.bg,color:s.fg}}
+                     onClick={e=>e.stopPropagation()}>
+                    Watch on {svc}
+                  </a>
+                ):null;
+              })}
+            </div>
+          )}
           {item.description&&<p className="dm-desc">{item.description}</p>}
 
           {isOngoing&&item.totalSeasons>0&&(
@@ -686,6 +1088,7 @@ function AddModal({onClose,onAdd}){
   const[q,setQ]=useState('');
   const[mtype,setMtype]=useState('movie');
   const[movieIntent,setMovieIntent]=useState('watch');
+  const[movieGenre,setMovieGenre]=useState('');
   const[tvCat,setTvCat]=useState('released'); // released=Start, comingSoon=Ongoing, rewatch
   const[results,setResults]=useState([]);
   const[sel,setSel]=useState(null);
@@ -746,13 +1149,23 @@ function AddModal({onClose,onAdd}){
     if(mtype==='movie'){
       if(movieIntent==='rewatch'){
         onAdd({...base,id:uid(),type:'movie',category:'rewatch',title});
+      }else if(movieIntent==='favorite'){
+        onAdd({...base,id:uid(),type:'movie',category:'favorite',title,favorite:true,genre:movieGenre,streaming:[],streamingNote:''});
       }else{
         const cat=sel?.date&&sel.date>=TODAY()?'comingSoon':'released';
         onAdd({...base,id:uid(),type:'movie',category:cat,title});
       }
     }else{
       const sk=sel?.tmdbId?showKey(sel.tmdbId):null;
-      if(tvCat==='comingSoon'){
+      if(tvCat==='favorite'){
+        let tvUpd={};
+        if(sel?.tmdbId){
+          const dets=await fetchTVDetails(sel.tmdbId);
+          if(dets) tvUpd=buildTVDisplay(dets,'favorite');
+        }
+        onAdd({...base,id:uid(),type:'tv',category:'favorite',title,
+          showKey:sk,tvDetailsFetched:true,favorite:true,...tvUpd});
+      }else if(tvCat==='comingSoon'){
         // Ongoing — data already fetched in selectResult
         onAdd({...base,id:uid(),type:'tv',category:'comingSoon',title,
           showKey:sk,tvDetailsFetched:!!tvDets,
@@ -796,15 +1209,24 @@ function AddModal({onClose,onAdd}){
         {/* Category */}
         {isTV?(
           <div className="intent-toggle" style={{marginBottom:12}}>
-            {[['released','Start'],['comingSoon','Ongoing'],['rewatch','Rewatch']].map(([k,l])=>(
+            {[['released','Start'],['comingSoon','Ongoing'],['rewatch','Rewatch'],['favorite','⭐ Favorite']].map(([k,l])=>(
               <button key={k} className={`intent-btn${tvCat===k?' on':''}`} onClick={()=>{setTvCat(k);setSel(null);resetTV();}}>{l}</button>
             ))}
           </div>
         ):(
-          <div className="intent-toggle" style={{marginBottom:12}}>
-            <button className={`intent-btn${movieIntent==='watch'?' on':''}`} onClick={()=>setMovieIntent('watch')}>Want to Watch</button>
-            <button className={`intent-btn${movieIntent==='rewatch'?' on':''}`} onClick={()=>setMovieIntent('rewatch')}>Rewatch</button>
-          </div>
+          <>
+            <div className="intent-toggle" style={{marginBottom:12}}>
+              <button className={`intent-btn${movieIntent==='watch'?' on':''}`} onClick={()=>setMovieIntent('watch')}>Want to Watch</button>
+              <button className={`intent-btn${movieIntent==='rewatch'?' on':''}`} onClick={()=>setMovieIntent('rewatch')}>Rewatch</button>
+              <button className={`intent-btn${movieIntent==='favorite'?' on':''}`} onClick={()=>setMovieIntent('favorite')}>⭐ Favorite</button>
+            </div>
+            {movieIntent==='favorite'&&(
+              <select className="msel" style={{marginBottom:12}} value={movieGenre} onChange={e=>setMovieGenre(e.target.value)}>
+                <option value="">Genre — optional</option>
+                {GENRES.map(g=><option key={g} value={g}>{g}</option>)}
+              </select>
+            )}
+          </>
         )}
 
         <div className="row2" style={{marginBottom:12}}>
@@ -878,22 +1300,31 @@ function AddModal({onClose,onAdd}){
 /* ── APP ── */
 function App(){
   const[items,setItems]=useState(()=>{
+    const merge=(base,extra)=>{
+      const seen=new Set(base.map(i=>`${i.type}:${i.title.toLowerCase()}`));
+      return[...base,...extra.filter(f=>!seen.has(`${f.type}:${f.title.toLowerCase()}`))];
+    };
     try{
-      const s=localStorage.getItem('watchlist-v5');
-      if(s)return autoMove(JSON.parse(s));
+      const s7=localStorage.getItem('watchlist-v7');
+      if(s7)return autoMove(JSON.parse(s7));
+      const s6=localStorage.getItem('watchlist-v6');
+      if(s6)return autoMove(merge(JSON.parse(s6),FAVS_DATA));
+      const s5=localStorage.getItem('watchlist-v5');
+      if(s5)return autoMove(merge(JSON.parse(s5).map(i=>({favorite:false,genre:'',isCrown:false,bestPictureYear:null,...i})),FAVS_DATA));
     }catch{}
-    return autoMove(DATA);
+    return autoMove([...DATA,...FAVS_DATA]);
   });
   const[tab,setTab]=useState('movie');
   const[section,setSection]=useState('comingSoon');
   const[showAdd,setShowAdd]=useState(false);
   const[detail,setDetail]=useState(null);
+  const[favDetail,setFavDetail]=useState(null);
   const[done,setDone]=useState(0);
   const[total,setTotal]=useState(0);
   const[fetching,setFetching]=useState(false);
 
   useEffect(()=>{
-    try{localStorage.setItem('watchlist-v5',JSON.stringify(items));}catch{}
+    try{localStorage.setItem('watchlist-v7',JSON.stringify(items));}catch{}
   },[items]);
 
   useEffect(()=>{
@@ -956,19 +1387,20 @@ function App(){
       released:arr.filter(i=>i.category==='released').length,
       comingSoon:arr.filter(i=>i.category==='comingSoon').length,
       rewatch:arr.filter(i=>i.category==='rewatch').length,
+      favorites:arr.filter(i=>i.favorite).length,
     });
     return{movie:{total:mv.length,...sc(mv)},tv:{total:tv.length,...sc(tv)}};
   },[items]);
 
   const visible=useMemo(()=>sortedItems(items.filter(i=>i.type===tab&&i.category===section),section),[items,tab,section]);
 
-  const switchTab=t=>{setTab(t);setSection(t==='movie'?'comingSoon':'released');};
+  const switchTab=t=>{setTab(t);setSection(s=>s==='favorites'?'favorites':(t==='movie'?'comingSoon':'released'));};
 
   const pct=total>0?(done/total)*100:100;
   const tc=counts[tab];
   const SECTIONS=tab==='movie'
-    ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch]]
-    :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch]];
+    ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
+    :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
 
   return(
     <>
@@ -976,10 +1408,9 @@ function App(){
         <div className="hdr-top">
           <div className="hdr-title">
             🍿 Watchlist
-            <small>{items.length} titles{fetching?` · ${done}/${total}`:''}</small>
+            {fetching&&<small>{done}/{total}</small>}
           </div>
           <div className="hdr-btns">
-            <button className="btn" onClick={exportJSON}>⬇ JSON</button>
             <button className="btn btn-gold" onClick={()=>setShowAdd(true)}>＋ Add</button>
           </div>
         </div>
@@ -990,18 +1421,14 @@ function App(){
           </div>
         )}
         <div className="tabs">
-          <button className={`tab${tab==='movie'?' on':''}`} onClick={()=>switchTab('movie')}>
-            Movies ({counts.movie.total})
-          </button>
-          <button className={`tab${tab==='tv'?' on':''}`} onClick={()=>switchTab('tv')}>
-            TV Shows ({counts.tv.total})
-          </button>
+          <button className={`tab${tab==='movie'?' on':''}`} onClick={()=>switchTab('movie')}>Movies</button>
+          <button className={`tab${tab==='tv'?' on':''}`} onClick={()=>switchTab('tv')}>TV Shows</button>
         </div>
         <div className="seg-wrap">
           <div className="seg">
             {SECTIONS.map(([key,label,cnt])=>(
               <button key={key} className={`seg-btn${section===key?' on':''}`} onClick={()=>setSection(key)}>
-                {label}<span className="seg-cnt">{cnt}</span>
+                {label}
               </button>
             ))}
           </div>
@@ -1009,10 +1436,16 @@ function App(){
       </div>
 
       <div className="main">
-        {!visible.length&&<div className="empty">Nothing here yet — tap ＋ Add to get started</div>}
-        <div className="grid">
-          {visible.map(it=><Card key={it.id} item={it} onTap={setDetail}/>)}
-        </div>
+        {section==='favorites'?(
+          <FavoritesView items={items} tab={tab} onTap={it=>{setFavDetail(it);setDetail(null);}}/>
+        ):(
+          <>
+            {!visible.length&&<div className="empty">Nothing here yet — tap ＋ Add to get started</div>}
+            <div className="grid">
+              {visible.map(it=><Card key={it.id} item={it} onTap={setDetail}/>)}
+            </div>
+          </>
+        )}
       </div>
 
       {detail&&(
@@ -1022,6 +1455,14 @@ function App(){
           onWatched={removeItem}
           onRemove={removeItem}
           onUpdateItem={updateItem}
+        />
+      )}
+      {favDetail&&(
+        <FavoriteDetailModal
+          item={favDetail}
+          onClose={()=>setFavDetail(null)}
+          onRemove={id=>{removeItem(id);setFavDetail(null);}}
+          onUpdateItem={(id,upd)=>{updateItem(id,upd);setFavDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);}}
         />
       )}
       {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem}/>}
