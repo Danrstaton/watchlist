@@ -195,6 +195,31 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .fav-genre-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .crown-toggle{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-bottom:14px;padding:11px 14px;-webkit-tap-highlight-color:transparent;transition:border-color .2s}
 .crown-toggle.on{background:rgba(245,197,24,.08);border-color:#f5c518}
+/* MCU List */
+.mcu-row{align-items:center;border-bottom:1px solid var(--border);cursor:default;display:flex;gap:10px;padding:9px 0}
+.mcu-row:last-child{border-bottom:none}
+.mcu-check{align-items:center;background:none;border:2px solid var(--border);border-radius:5px;color:transparent;cursor:pointer;display:flex;flex-shrink:0;font-size:12px;font-weight:800;height:22px;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .15s;width:22px}
+.mcu-check.on{background:var(--green);border-color:var(--green);color:#fff}
+.mcu-thumb{border-radius:5px;cursor:pointer;flex-shrink:0;height:54px;object-fit:cover;width:36px}
+.mcu-thumb-ph{align-items:center;background:var(--card2);display:flex;font-size:18px;justify-content:center}
+.mcu-info{cursor:pointer;flex:1;min-width:0}
+.mcu-title{font-size:13px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcu-season{color:var(--text2);font-size:10px;font-weight:400;margin-top:1px}
+.mcu-date{color:var(--accent);font-size:11px;font-weight:500;margin-top:2px}
+.mcu-phase-hdr{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;color:var(--text);cursor:pointer;display:flex;font-size:13px;font-weight:700;gap:8px;margin-bottom:0;margin-top:12px;padding:10px 14px;text-align:left;-webkit-tap-highlight-color:transparent;transition:background .15s;width:100%}
+.mcu-phase-hdr:hover{background:rgba(255,255,255,.08)}
+.mcu-phase-items{padding:0 6px}
+.mcu-progress{color:var(--text2);font-size:11px;font-weight:400}
+/* MCU Rankings */
+.mcu-rank-row{align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;gap:9px;margin-bottom:7px;padding:8px 10px;transition:box-shadow .15s}
+.mcu-rank-num{color:var(--accent);flex-shrink:0;font-size:15px;font-weight:800;min-width:26px;text-align:center}
+.mcu-rank-info{cursor:pointer;flex:1;min-width:0}
+.mcu-rank-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcu-rank-sub{color:var(--text2);font-size:10px;margin-top:2px}
+.mcu-arrows{display:flex;flex-direction:column;flex-shrink:0;gap:3px}
+.mcu-arrow{align-items:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;color:var(--text2);cursor:pointer;display:flex;font-size:10px;justify-content:center;padding:4px 7px;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.mcu-arrow:hover:not(:disabled){background:rgba(255,255,255,.14);color:var(--text)}
+.mcu-arrow:disabled{opacity:.2;cursor:default}
 </style>
 </head>
 <body>
@@ -466,6 +491,101 @@ const FAVS_DATA=[
   mkf('tv','Friends',''),
 ];
 
+/* ── MCU DATA ── */
+const MCU_PHASES=['Phase 1','Phase 2','Phase 3','Phase 4','Phase 5','Phase 6','Announced','Rumored'];
+const mkMCU=(title,phase,date,watched,type='movie')=>({id:uid(),title,phase,releaseDate:date,watched:!!watched,type,poster:null,description:'',tmdbId:null,tmdbFetched:false});
+
+const MCU_DATA=(()=>{
+  const m=(t,p,d,w=true)=>mkMCU(t,p,d,w,'movie');
+  const s=(t,p,d,w=true)=>mkMCU(t,p,d,w,'tv');
+  return[
+    // Phase 1
+    m('Iron Man','Phase 1','5/2/08'),
+    m('The Incredible Hulk','Phase 1','6/13/08'),
+    m('Iron Man 2','Phase 1','5/7/10'),
+    m('Thor','Phase 1','5/6/11'),
+    m('Captain America: The First Avenger','Phase 1','7/22/11'),
+    m('The Avengers','Phase 1','5/4/12'),
+    // Phase 2
+    m('Iron Man 3','Phase 2','5/3/13'),
+    m('Thor: The Dark World','Phase 2','11/8/13'),
+    m('Captain America: The Winter Soldier','Phase 2','4/4/14'),
+    m('Guardians of the Galaxy','Phase 2','8/1/14'),
+    m('Avengers: Age of Ultron','Phase 2','5/1/15'),
+    m('Ant-Man','Phase 2','7/17/15'),
+    // Phase 3
+    m('Captain America: Civil War','Phase 3','5/6/16'),
+    m('Doctor Strange','Phase 3','11/4/16'),
+    m('Guardians of the Galaxy Vol. 2','Phase 3','5/5/17'),
+    m('Spider-Man: Homecoming','Phase 3','7/7/17'),
+    m('Thor: Ragnarok','Phase 3','11/3/17'),
+    m('Black Panther','Phase 3','2/16/18'),
+    m('Avengers: Infinity War','Phase 3','4/27/18'),
+    m('Ant-Man and the Wasp','Phase 3','7/6/18'),
+    m('Captain Marvel','Phase 3','3/8/19'),
+    m('Avengers: Endgame','Phase 3','4/26/19'),
+    m('Spider-Man: Far From Home','Phase 3','7/2/19'),
+    // Phase 4
+    s('WandaVision','Phase 4','1/15/21'),
+    s('The Falcon and the Winter Soldier','Phase 4','3/19/21'),
+    s('Loki (S1)','Phase 4','6/9/21'),
+    m('Black Widow','Phase 4','7/9/21'),
+    s('What If...? (S1)','Phase 4','8/11/21'),
+    m('Shang-Chi and the Legend of the Ten Rings','Phase 4','9/3/21'),
+    m('Eternals','Phase 4','11/5/21'),
+    s('Hawkeye','Phase 4','11/24/21'),
+    m('Spider-Man: No Way Home','Phase 4','12/17/21'),
+    s('Moon Knight','Phase 4','3/30/22'),
+    m('Doctor Strange in the Multiverse of Madness','Phase 4','5/6/22'),
+    s('Ms. Marvel','Phase 4','6/8/22'),
+    m('Thor: Love and Thunder','Phase 4','7/8/22'),
+    s('I Am Groot','Phase 4','8/10/22'),
+    s('She-Hulk: Attorney at Law','Phase 4','8/17/22'),
+    m('Werewolf by Night','Phase 4','10/7/22'),
+    m('Black Panther: Wakanda Forever','Phase 4','11/11/22'),
+    s('Guardians of the Galaxy Holiday Special','Phase 4','11/25/22'),
+    // Phase 5
+    m('Ant-Man and the Wasp: Quantumania','Phase 5','2/17/23'),
+    m('Guardians of the Galaxy Vol. 3','Phase 5','5/5/23'),
+    s('Secret Invasion','Phase 5','6/21/23'),
+    s('Loki (S2)','Phase 5','10/6/23'),
+    m('The Marvels','Phase 5','11/10/23'),
+    s('What If...? (S2)','Phase 5','12/22/23'),
+    s('Echo','Phase 5','1/9/24'),
+    s("X-Men '97 (S1)",'Phase 5','3/20/24'),
+    m('Deadpool & Wolverine','Phase 5','7/26/24'),
+    s('Agatha All Along','Phase 5','9/18/24'),
+    s('What If...? (S3)','Phase 5','12/22/24'),
+    s('Your Friendly Neighborhood Spider-Man (S1)','Phase 5','1/29/25'),
+    m('Captain America: Brave New World','Phase 5','2/14/25'),
+    s('Daredevil: Born Again (S1)','Phase 5','3/4/25'),
+    m('Thunderbolts*','Phase 5','5/2/25'),
+    s('Ironheart','Phase 5','6/24/25'),
+    // Phase 6
+    m('The Fantastic Four: First Steps','Phase 6','7/25/25'),
+    s('Eyes of Wakanda','Phase 6','8/1/25'),
+    s('Marvel Zombies','Phase 6','9/24/25'),
+    s('Wonder Man','Phase 6','1/27/26'),
+    s('Daredevil: Born Again (S2)','Phase 6','3/24/26',false),
+    m('The Punisher: One Last Kill','Phase 6','5/12/26',false),
+    m('Spider-Man: Brand New Day','Phase 6','7/31/26',false),
+    s("X-Men '97 (S2)",'Phase 6','Summer 2026',false),
+    s('Your Friendly Neighborhood Spider-Man (S2)','Phase 6','Fall 2026',false),
+    s('Vision Quest','Phase 6','10/14/26',false),
+    m('Avengers: Doomsday','Phase 6','12/18/26',false),
+    m('Avengers: Secret Wars','Phase 6','12/17/27',false),
+    // Announced
+    s('Daredevil (S3)','Announced','2027',false),
+    s('Your Friendly Neighborhood Spider-Man (S3)','Announced','2027',false),
+    // Rumored
+    m('Blade','Rumored','',false),
+    m('Armor Wars','Rumored','',false),
+    m('Shang-Chi 2','Rumored','',false),
+    m('Doctor Strange 3','Rumored','',false),
+    m('Thor 5','Rumored','',false),
+  ];
+})();
+
 /* ── TMDB API ── */
 async function tmdbSearch(title,type){
   const q=title.replace(/\s*\(.*?\)/g,'').replace(/:\s*(season|s)\s*\d+/i,'').trim();
@@ -566,6 +686,17 @@ async function fetchItem(item){
     Object.assign(update,tvUpd);
   }
   return update;
+}
+
+async function fetchMCUItem(item){
+  if(item.phase==='Rumored')return{tmdbFetched:true};
+  const q=item.title.replace(/\s*\([Ss]\d+\)/g,'').replace(/\s+Season\s+\d+/gi,'').replace(/\*/g,'').replace(/\s*\(.*?\)/g,'').trim();
+  try{
+    const results=await tmdbSearch(q,item.type);
+    const r=results[0];
+    if(!r)return{tmdbFetched:true};
+    return{poster:r.poster,description:r.description,tmdbId:r.tmdbId,tmdbFetched:true};
+  }catch{return{tmdbFetched:true};}
 }
 
 async function runQ(tasks,limit){
@@ -1084,12 +1215,133 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
   );
 }
 
-function AddModal({onClose,onAdd}){
+/* ── MCU COMPONENTS ── */
+function MCURow({item,onToggleWatched,onTap}){
+  return(
+    <div className="mcu-row">
+      <button className={`mcu-check${item.watched?' on':''}`} onClick={e=>{e.stopPropagation();onToggleWatched(item.id);}}>
+        {item.watched?'✓':''}
+      </button>
+      <div className="mcu-thumb mcu-thumb-ph" style={{display:'none'}}/>
+      {item.poster
+        ?<img className="mcu-thumb" src={item.poster} alt={item.title} loading="lazy" onClick={()=>onTap(item)}/>
+        :<div className="mcu-thumb mcu-thumb-ph" onClick={()=>onTap(item)}>🎬</div>
+      }
+      <div className="mcu-info" onClick={()=>onTap(item)}>
+        <div className="mcu-title">{item.title.replace(/\s*\([Ss]\d+\)/,'')}</div>
+        <div style={{display:'flex',alignItems:'baseline',gap:6}}>
+          {item.releaseDate&&<div className="mcu-date">{item.releaseDate}</div>}
+          {/\([Ss](\d+)\)/.test(item.title)&&<span className="mcu-season">Season {item.title.match(/\([Ss](\d+)\)/)[1]}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MCUPhaseSection({phase,items,onToggleWatched,onTap}){
+  const[open,setOpen]=useState(phase!=='Rumored'&&phase!=='Announced'?true:false);
+  const watched=items.filter(i=>i.watched).length;
+  return(
+    <div style={{marginBottom:4}}>
+      <button className="mcu-phase-hdr" onClick={()=>setOpen(v=>!v)}>
+        <span style={{flex:1}}>{phase}</span>
+        <span className="mcu-progress">{watched}/{items.length}</span>
+        <span style={{color:'var(--text2)',fontSize:11,marginLeft:6}}>{open?'▾':'▸'}</span>
+      </button>
+      {open&&<div className="mcu-phase-items">{items.map(i=><MCURow key={i.id} item={i} onToggleWatched={onToggleWatched} onTap={onTap}/>)}</div>}
+    </div>
+  );
+}
+
+function MCUListView({mcuItems,onToggleWatched,onTap}){
+  const byPhase={};
+  MCU_PHASES.forEach(p=>{byPhase[p]=[];});
+  mcuItems.forEach(i=>{if(byPhase[i.phase])byPhase[i.phase].push(i);});
+  return(
+    <div>
+      {MCU_PHASES.map(phase=>{
+        const items=byPhase[phase]||[];
+        if(!items.length)return null;
+        return<MCUPhaseSection key={phase} phase={phase} items={items} onToggleWatched={onToggleWatched} onTap={onTap}/>;
+      })}
+    </div>
+  );
+}
+
+function MCURankRow({item,rank,isFirst,isLast,onMoveUp,onMoveDown,onTap}){
+  return(
+    <div className="mcu-rank-row">
+      <span className="mcu-rank-num">{rank}</span>
+      {item.poster
+        ?<img className="mcu-thumb" src={item.poster} alt={item.title} loading="lazy" style={{cursor:'pointer'}} onClick={()=>onTap(item)}/>
+        :<div className="mcu-thumb mcu-thumb-ph" style={{cursor:'pointer'}} onClick={()=>onTap(item)}>🎬</div>
+      }
+      <div className="mcu-rank-info" onClick={()=>onTap(item)}>
+        <div className="mcu-rank-title">{item.title}</div>
+        <div className="mcu-rank-sub">{item.phase}{item.releaseDate?` · ${item.releaseDate}`:''}</div>
+      </div>
+      <div className="mcu-arrows">
+        <button className="mcu-arrow" onClick={onMoveUp} disabled={isFirst}>▲</button>
+        <button className="mcu-arrow" onClick={onMoveDown} disabled={isLast}>▼</button>
+      </div>
+    </div>
+  );
+}
+
+function MCURankingsView({mcuItems,ranking,onRankChange,onTap}){
+  const byId={};
+  mcuItems.forEach(i=>{byId[i.id]=i;});
+  const ranked=ranking.map(id=>byId[id]).filter(Boolean);
+  const move=(idx,dir)=>{
+    const n=[...ranking];
+    const t=n[idx+dir];n[idx+dir]=n[idx];n[idx]=t;
+    onRankChange(n);
+  };
+  return(
+    <div>
+      {ranked.map((item,idx)=>(
+        <MCURankRow key={item.id} item={item} rank={idx+1}
+          isFirst={idx===0} isLast={idx===ranked.length-1}
+          onMoveUp={()=>move(idx,-1)} onMoveDown={()=>move(idx,1)}
+          onTap={onTap}/>
+      ))}
+    </div>
+  );
+}
+
+function MCUDetailModal({item,onClose}){
+  return(
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="dm-outer" onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="dm-poster-float">
+          {item.poster?<img src={item.poster} alt={item.title}/>:<div className="dm-poster-ph-lg">🎬</div>}
+        </div>
+        <div className="dm-sheet">
+          <div className="dm-sheet-drag"/>
+          <div className="dm-sheet-title">{item.title}</div>
+          <div className="dm-sheet-meta">
+            <span style={{color:'var(--text2)',fontSize:12}}>{item.phase}</span>
+            {item.releaseDate&&<span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>{item.releaseDate}</span>}
+            {item.type==='tv'&&<span className="badge" style={{background:'var(--card2)',color:'var(--text2)'}}>Series</span>}
+          </div>
+          {item.description&&<p className="dm-desc">{item.description}</p>}
+          <div className="dm-actions">
+            <button className="btn" onClick={onClose}>Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddModal({onClose,onAdd,onAddMCU}){
   const[q,setQ]=useState('');
   const[mtype,setMtype]=useState('movie');
   const[movieIntent,setMovieIntent]=useState('watch');
   const[movieGenre,setMovieGenre]=useState('');
   const[tvCat,setTvCat]=useState('released'); // released=Start, comingSoon=Ongoing, rewatch
+  const[mcuPhase,setMcuPhase]=useState('Phase 1');
+  const[mcuItemType,setMcuItemType]=useState('movie');
   const[results,setResults]=useState([]);
   const[sel,setSel]=useState(null);
   const[loading,setLoading]=useState(false);
@@ -1134,6 +1386,13 @@ function AddModal({onClose,onAdd}){
   const toggleAll=()=>setWatchedSeasons(p=>p.size===tvSeasons?new Set():new Set(Array.from({length:tvSeasons},(_,i)=>i+1)));
 
   const handleAdd=async()=>{
+    if(mtype==='mcu'){
+      if(!q.trim())return;
+      setAdding(true);
+      const newItem=mkMCU(q.trim(),mcuPhase,'',false,mcuItemType);
+      onAddMCU(newItem);
+      setAdding(false);onClose();return;
+    }
     if(!sel&&!q.trim())return;
     setAdding(true);
     const title=sel?sel.title:q.trim();
@@ -1200,11 +1459,25 @@ function AddModal({onClose,onAdd}){
         <div className="dm-drag"/>
         <div className="modal-title">Add to Watchlist</div>
 
-        {/* Movie / TV segmented */}
+        {/* Movie / TV / MCU segmented */}
         <div className="intent-toggle" style={{marginBottom:12}}>
           <button className={`intent-btn${mtype==='movie'?' on':''}`} onClick={()=>{setMtype('movie');setResults([]);setSel(null);resetTV();}}>🎬 Movie</button>
           <button className={`intent-btn${mtype==='tv'?' on':''}`} onClick={()=>{setMtype('tv');setResults([]);setSel(null);resetTV();}}>📺 TV Show</button>
+          <button className={`intent-btn${mtype==='mcu'?' on':''}`} onClick={()=>{setMtype('mcu');setResults([]);setSel(null);resetTV();}}>🦸 MCU</button>
         </div>
+
+        {/* MCU pickers */}
+        {mtype==='mcu'&&(
+          <>
+            <select className="msel" style={{marginBottom:8}} value={mcuPhase} onChange={e=>setMcuPhase(e.target.value)}>
+              {MCU_PHASES.map(p=><option key={p} value={p}>{p}</option>)}
+            </select>
+            <div className="intent-toggle" style={{marginBottom:12}}>
+              <button className={`intent-btn${mcuItemType==='movie'?' on':''}`} onClick={()=>setMcuItemType('movie')}>Movie</button>
+              <button className={`intent-btn${mcuItemType==='tv'?' on':''}`} onClick={()=>setMcuItemType('tv')}>Series</button>
+            </div>
+          </>
+        )}
 
         {/* Category */}
         {isTV?(
@@ -1319,13 +1592,37 @@ function App(){
   const[showAdd,setShowAdd]=useState(false);
   const[detail,setDetail]=useState(null);
   const[favDetail,setFavDetail]=useState(null);
+  const[mcuDetail,setMcuDetail]=useState(null);
   const[done,setDone]=useState(0);
   const[total,setTotal]=useState(0);
   const[fetching,setFetching]=useState(false);
+  const[mcuItems,setMcuItems]=useState(()=>{
+    try{const s=localStorage.getItem('mcu-v1');if(s)return JSON.parse(s);}catch{}
+    return MCU_DATA;
+  });
+  const[mcuRanking,setMcuRanking]=useState(()=>{
+    try{const s=localStorage.getItem('mcu-ranking-v1');if(s)return JSON.parse(s);}catch{}
+    return MCU_DATA.filter(i=>i.phase!=='Rumored').map(i=>i.id);
+  });
 
   useEffect(()=>{
     try{localStorage.setItem('watchlist-v7',JSON.stringify(items));}catch{}
   },[items]);
+  useEffect(()=>{
+    try{localStorage.setItem('mcu-v1',JSON.stringify(mcuItems));}catch{}
+  },[mcuItems]);
+  useEffect(()=>{
+    try{localStorage.setItem('mcu-ranking-v1',JSON.stringify(mcuRanking));}catch{}
+  },[mcuRanking]);
+  useEffect(()=>{
+    const need=mcuItems.filter(i=>!i.tmdbFetched);
+    if(!need.length)return;
+    const tasks=need.map(item=>async()=>{
+      const upd=await fetchMCUItem(item);
+      setMcuItems(prev=>prev.map(i=>i.id===item.id?{...i,...upd}:i));
+    });
+    runQ(tasks,5);
+  },[]);// eslint-disable-line
 
   useEffect(()=>{
     const needBasic=items.filter(i=>!i.tmdbFetched);
@@ -1372,6 +1669,12 @@ function App(){
   },[]);
 
   const addItem=useCallback(item=>setItems(p=>[...p,item]),[]);
+  const addMCUItem=useCallback(item=>{
+    setMcuItems(p=>[...p,item]);
+    if(item.phase!=='Rumored')setMcuRanking(p=>[...p,item.id]);
+  },[]);
+  const toggleMCUWatched=useCallback(id=>setMcuItems(p=>p.map(i=>i.id===id?{...i,watched:!i.watched}:i)),[]);
+  const updateMCURanking=useCallback(r=>setMcuRanking(r),[]);
 
   const exportJSON=()=>{
     const b=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});
@@ -1394,13 +1697,19 @@ function App(){
 
   const visible=useMemo(()=>sortedItems(items.filter(i=>i.type===tab&&i.category===section),section),[items,tab,section]);
 
-  const switchTab=t=>{setTab(t);setSection(s=>s==='favorites'?'favorites':(t==='movie'?'comingSoon':'released'));};
+  const switchTab=t=>{
+    setTab(t);
+    if(t==='mcu')setSection('list');
+    else setSection(s=>s==='favorites'?'favorites':(t==='movie'?'comingSoon':'released'));
+  };
 
   const pct=total>0?(done/total)*100:100;
-  const tc=counts[tab];
-  const SECTIONS=tab==='movie'
-    ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
-    :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
+  const tc=counts[tab]||{};
+  const SECTIONS=tab==='mcu'
+    ?[['list','List',''],['rankings','Rankings','']]
+    :tab==='movie'
+      ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
+      :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
 
   return(
     <>
@@ -1423,6 +1732,7 @@ function App(){
         <div className="tabs">
           <button className={`tab${tab==='movie'?' on':''}`} onClick={()=>switchTab('movie')}>Movies</button>
           <button className={`tab${tab==='tv'?' on':''}`} onClick={()=>switchTab('tv')}>TV Shows</button>
+          <button className={`tab${tab==='mcu'?' on':''}`} onClick={()=>switchTab('mcu')}>MCU</button>
         </div>
         <div className="seg-wrap">
           <div className="seg">
@@ -1436,7 +1746,11 @@ function App(){
       </div>
 
       <div className="main">
-        {section==='favorites'?(
+        {tab==='mcu'?(
+          section==='rankings'
+            ?<MCURankingsView mcuItems={mcuItems} ranking={mcuRanking} onRankChange={updateMCURanking} onTap={setMcuDetail}/>
+            :<MCUListView mcuItems={mcuItems} onToggleWatched={toggleMCUWatched} onTap={setMcuDetail}/>
+        ):section==='favorites'?(
           <FavoritesView items={items} tab={tab} onTap={it=>{setFavDetail(it);setDetail(null);}}/>
         ):(
           <>
@@ -1465,7 +1779,8 @@ function App(){
           onUpdateItem={(id,upd)=>{updateItem(id,upd);setFavDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);}}
         />
       )}
-      {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem}/>}
+      {mcuDetail&&<MCUDetailModal item={mcuDetail} onClose={()=>setMcuDetail(null)}/>}
+      {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem} onAddMCU={addMCUItem}/>}
     </>
   );
 }
