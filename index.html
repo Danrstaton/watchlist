@@ -212,7 +212,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mcu-progress{color:var(--text2);font-size:11px;font-weight:400}
 /* MCU Rankings */
 .mcu-rank-row{align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;gap:9px;margin-bottom:7px;padding:8px 10px;transition:box-shadow .15s}
-.mcu-rank-num{color:var(--accent);flex-shrink:0;font-size:15px;font-weight:800;min-width:26px;text-align:center}
+.mcu-rank-num{color:var(--accent);cursor:pointer;flex-shrink:0;font-size:15px;font-weight:800;min-width:26px;text-align:center}
+.mcu-rank-input{background:none;border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-size:13px;font-weight:800;padding:2px 0;text-align:center;width:38px}
 .mcu-rank-info{cursor:pointer;flex:1;min-width:0}
 .mcu-rank-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mcu-rank-sub{color:var(--text2);font-size:10px;margin-top:2px}
@@ -1286,16 +1287,30 @@ function MCUListView({mcuItems,onToggleWatched,onTap}){
   );
 }
 
-function MCURankRow({item,rank,isFirst,isLast,onMoveUp,onMoveDown,onTap}){
+function MCURankRow({item,rank,total,isFirst,isLast,onMoveUp,onMoveDown,onMoveTo,onTap}){
+  const[editing,setEditing]=useState(false);
+  const[editVal,setEditVal]=useState('');
+  const commit=()=>{
+    const n=parseInt(editVal,10);
+    if(!isNaN(n)&&n>=1&&n<=total)onMoveTo(n);
+    setEditing(false);
+  };
   return(
     <div className="mcu-rank-row">
-      <span className="mcu-rank-num">{rank}</span>
+      {editing
+        ?<input className="mcu-rank-input" autoFocus type="number" min={1} max={total} value={editVal}
+            onChange={e=>setEditVal(e.target.value)}
+            onBlur={commit}
+            onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();commit();}if(e.key==='Escape')setEditing(false);}}
+          />
+        :<span className="mcu-rank-num" onClick={()=>{setEditVal(String(rank));setEditing(true);}}>{rank}</span>
+      }
       {item.poster
         ?<img className="mcu-thumb" src={item.poster} alt={item.title} loading="lazy" style={{cursor:'pointer'}} onClick={()=>onTap(item)}/>
         :<div className="mcu-thumb mcu-thumb-ph" style={{cursor:'pointer'}} onClick={()=>onTap(item)}>🎬</div>
       }
       <div className="mcu-rank-info" onClick={()=>onTap(item)}>
-        <div className="mcu-rank-title">{item.title}</div>
+        <div className="mcu-rank-title">{item.title.replace(/\s*\([Ss]\d+\)/,'')}</div>
         <div className="mcu-rank-sub">{item.phase}{item.releaseDate?` · ${item.releaseDate}`:''}</div>
       </div>
       <div className="mcu-arrows">
@@ -1310,17 +1325,20 @@ function MCURankingsView({mcuItems,ranking,onRankChange,onTap}){
   const byId={};
   mcuItems.forEach(i=>{byId[i.id]=i;});
   const ranked=ranking.map(id=>byId[id]).filter(Boolean);
-  const move=(idx,dir)=>{
-    const n=[...ranking];
-    const t=n[idx+dir];n[idx+dir]=n[idx];n[idx]=t;
-    onRankChange(n);
+  const reorder=(fromIdx,toIdx)=>{
+    const ids=ranked.map(i=>i.id);
+    const[id]=ids.splice(fromIdx,1);
+    ids.splice(toIdx,0,id);
+    onRankChange(ids);
   };
   return(
     <div>
       {ranked.map((item,idx)=>(
-        <MCURankRow key={item.id} item={item} rank={idx+1}
+        <MCURankRow key={item.id} item={item} rank={idx+1} total={ranked.length}
           isFirst={idx===0} isLast={idx===ranked.length-1}
-          onMoveUp={()=>move(idx,-1)} onMoveDown={()=>move(idx,1)}
+          onMoveUp={()=>reorder(idx,idx-1)}
+          onMoveDown={()=>reorder(idx,idx+1)}
+          onMoveTo={n=>reorder(idx,Math.max(0,Math.min(ranked.length-1,n-1)))}
           onTap={onTap}/>
       ))}
     </div>
@@ -1504,7 +1522,7 @@ function AddModal({onClose,onAdd,onAddMCU}){
               <button key={k} className={`intent-btn${tvCat===k?' on':''}`} onClick={()=>{setTvCat(k);setSel(null);resetTV();}}>{l}</button>
             ))}
           </div>
-        ):(
+        ):mtype==='movie'?(
           <>
             <div className="intent-toggle" style={{marginBottom:12}}>
               <button className={`intent-btn${movieIntent==='watch'?' on':''}`} onClick={()=>setMovieIntent('watch')}>Want to Watch</button>
@@ -1518,7 +1536,7 @@ function AddModal({onClose,onAdd,onAddMCU}){
               </select>
             )}
           </>
-        )}
+        ):null}
 
         <div className="row2" style={{marginBottom:12}}>
           <input ref={ref} className="minput" style={{marginBottom:0,flex:1}} placeholder="Search title…"
@@ -1695,10 +1713,30 @@ function App(){
   const updateMCURanking=useCallback(r=>setMcuRanking(r),[]);
 
   const exportJSON=()=>{
-    const b=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});
+    const payload={version:1,exportedAt:new Date().toISOString(),watchlist:items,mcuItems,mcuRanking};
+    const b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const u=URL.createObjectURL(b);
-    const a=document.createElement('a');a.href=u;a.download='watchlist.json';a.click();
-    URL.revokeObjectURL(u);
+    const a=document.createElement('a');
+    a.href=u;a.download=`watchlist-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();URL.revokeObjectURL(u);
+  };
+  const importJSON=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        // Support both new format (with version key) and legacy plain array
+        if(Array.isArray(d)){setItems(autoMove(d));}
+        else{
+          if(d.watchlist)setItems(autoMove(d.watchlist));
+          if(d.mcuItems)setMcuItems(d.mcuItems);
+          if(d.mcuRanking)setMcuRanking(d.mcuRanking);
+        }
+      }catch{alert('Could not read backup file — make sure it\'s a valid Watchlist JSON export.');}
+    };
+    reader.readAsText(file);
+    e.target.value='';
   };
 
   const counts=useMemo(()=>{
@@ -1738,6 +1776,11 @@ function App(){
             {fetching&&<small>{done}/{total}</small>}
           </div>
           <div className="hdr-btns">
+            <button className="btn" onClick={exportJSON} title="Export backup">↓ Export</button>
+            <label className="btn" style={{cursor:'pointer'}} title="Import backup">
+              ↑ Import
+              <input type="file" accept=".json" style={{display:'none'}} onChange={importJSON}/>
+            </label>
             <button className="btn btn-gold" onClick={()=>setShowAdd(true)}>＋ Add</button>
           </div>
         </div>
