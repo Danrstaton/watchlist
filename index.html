@@ -787,7 +787,7 @@ function sortedItems(arr,sec,type){
   }
   return[...arr].sort((a,b)=>{
     const da=ms(a),db=ms(b);
-    if(da==null&&db==null)return 0;
+    if(da==null&&db==null)return a.title.localeCompare(b.title);
     if(da==null)return 1;if(db==null)return-1;
     return sec==='comingSoon'?da-db:db-da;
   });
@@ -1776,9 +1776,9 @@ function App(){
             {fetching&&<small>{done}/{total}</small>}
           </div>
           <div className="hdr-btns">
-            <button className="btn" onClick={exportJSON} title="Export backup">↓ Export</button>
-            <label className="btn" style={{cursor:'pointer'}} title="Import backup">
-              ↑ Import
+            <button className="btn" onClick={exportJSON} title="Export backup" style={{fontSize:16,padding:'6px 10px'}}>📤</button>
+            <label className="btn" style={{cursor:'pointer',fontSize:16,padding:'6px 10px'}} title="Import backup">
+              📥
               <input type="file" accept=".json" style={{display:'none'}} onChange={importJSON}/>
             </label>
             <button className="btn btn-gold" onClick={()=>setShowAdd(true)}>＋ Add</button>
