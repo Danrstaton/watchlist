@@ -766,7 +766,7 @@ function formatDate(item){
 }
 
 function sortedItems(arr,sec,type){
-  const ms=i=>{const d=parseDate(i.tmdbDate)||parseDate(i.userDate);return d?d.getTime():null;};
+  const ms=i=>{const d=parseDate(i.tmdbDate)||parseDate(i.firstAirDate)||parseDate(i.userDate);return d?d.getTime():null;};
   if(sec==='comingSoon'&&type==='tv'){
     // Group 0: has unwatched seasons → sort by most recently released desc
     // Group 1: all watched + new season with clear date → sort by newSeasonDate asc
