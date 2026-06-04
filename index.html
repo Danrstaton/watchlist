@@ -1639,7 +1639,7 @@ function AddModal({onClose,onAdd,onAddMCU}){
         {/* Category */}
         {isTV?(
           <div className="intent-toggle" style={{marginBottom:12}}>
-            {[['released','Start'],['comingSoon','Ongoing'],['rewatch','Rewatch'],['favorite','⭐ Favorite']].map(([k,l])=>(
+            {[['released','Watch'],['comingSoon','Upcoming'],['rewatch','Rewatch'],['favorite','⭐ Favorite']].map(([k,l])=>(
               <button key={k} className={`intent-btn${tvCat===k?' on':''}`} onClick={()=>{setTvCat(k);setSel(null);resetTV();}}>{l}</button>
             ))}
           </div>
@@ -1868,8 +1868,8 @@ function App(){
   const SECTIONS=tab==='mcu'
     ?[['list','List',''],['rankings','Rankings','']]
     :tab==='movie'
-      ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Released',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
-      :[['released','Start',tc.released],['comingSoon','Ongoing',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
+      ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Watch',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
+      :[['released','Watch',tc.released],['comingSoon','Upcoming',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
 
   return(
     <>
