@@ -1639,7 +1639,7 @@ function AddModal({onClose,onAdd,onAddMCU}){
         {/* Category */}
         {isTV?(
           <div className="intent-toggle" style={{marginBottom:12}}>
-            {[['released','Watch'],['comingSoon','Upcoming'],['rewatch','Rewatch'],['favorite','⭐ Favorite']].map(([k,l])=>(
+            {[['released','Watch'],['comingSoon','Coming Soon'],['rewatch','Rewatch'],['favorite','⭐ Favorite']].map(([k,l])=>(
               <button key={k} className={`intent-btn${tvCat===k?' on':''}`} onClick={()=>{setTvCat(k);setSel(null);resetTV();}}>{l}</button>
             ))}
           </div>
@@ -1745,7 +1745,7 @@ function App(){
     return autoMove([...DATA,...FAVS_DATA]);
   });
   const[tab,setTab]=useState('movie');
-  const[section,setSection]=useState('comingSoon');
+  const[section,setSection]=useState('released');
   const[showAdd,setShowAdd]=useState(false);
   const[showSettings,setShowSettings]=useState(false);
   const[detail,setDetail]=useState(null);
@@ -1860,7 +1860,7 @@ function App(){
   const switchTab=t=>{
     setTab(t);
     if(t==='mcu')setSection('list');
-    else setSection(s=>s==='favorites'?'favorites':(t==='movie'?'comingSoon':'released'));
+    else setSection(s=>s==='favorites'?'favorites':'released');
   };
 
   const pct=total>0?(done/total)*100:100;
@@ -1868,8 +1868,8 @@ function App(){
   const SECTIONS=tab==='mcu'
     ?[['list','List',''],['rankings','Rankings','']]
     :tab==='movie'
-      ?[['comingSoon','Coming Soon',tc.comingSoon],['released','Watch',tc.released],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
-      :[['released','Watch',tc.released],['comingSoon','Upcoming',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
+      ?[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
+      :[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
 
   return(
     <>
