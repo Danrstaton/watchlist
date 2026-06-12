@@ -949,7 +949,7 @@ function FavRow({item,onTap}){
         :<div className="fav-thumb fav-thumb-ph">🍿</div>
       }
       <div className="fav-row-info">
-        <div className="fav-row-title">{item.isCrown?'👑 ':''}{item.title}</div>
+        <div className="fav-row-title">{item.bestPictureYear?'🏆 ':''}{item.isCrown?'👑 ':''}{item.title}</div>
         {sub&&<div className="fav-row-year">{sub}</div>}
       </div>
     </div>
