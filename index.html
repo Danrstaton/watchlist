@@ -124,6 +124,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .spinner{animation:spin 1s linear infinite;border:2px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;display:inline-block;height:15px;width:15px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+.ptr{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;height:52px;color:var(--text2);font-size:12px;font-weight:600;pointer-events:none;z-index:300}
+.ptr-arrow{display:inline-block;font-size:15px;transition:transform .2s}
+.ptr-arrow.ready{transform:rotate(180deg);color:var(--accent)}
 .settings-section-title{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.8px;margin-bottom:10px;text-transform:uppercase}
 .settings-divider{border:none;border-top:1px solid var(--border);margin:18px 0}
 .settings-status{border-radius:7px;font-size:12px;margin-top:10px;padding:8px 10px;text-align:center}
@@ -639,28 +642,40 @@ async function fetchTVDetails(tmdbId){
       currentSeason:last?{date:last.air_date,season:last.season_number}:null,
       upcomingSeason:isNewSeason?{date:next.air_date,season:next.season_number}:null,
       totalSeasons:d.number_of_seasons||1,
-      releasedSeasons:last?last.season_number:(d.number_of_seasons||1),
+      releasedSeasons:last?last.season_number:0,   // 0 = nothing has aired yet (true premiere)
       firstAirDate:d.first_air_date||'',
     };
   }catch{return null;}
 }
 
+function tvYearRange(firstAirDate,latestDate){
+  const startYear=(firstAirDate||'').slice(0,4);
+  const endYear=(latestDate||'').slice(0,4)||startYear;
+  return startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:(startYear||endYear||'');
+}
+
 function buildTVDisplay(dets,cat){
-  // Returns {seasonNote,yearRange,totalSeasons,firstAirDate,tmdbDate}
-  const{currentSeason:cur,upcomingSeason:upc,totalSeasons,releasedSeasons,firstAirDate:fa}=dets;
-  const startYear=(fa||'').slice(0,4);
-  const endYear=cur?.date?.slice(0,4)||startYear;
-  const yr=startYear&&endYear&&startYear!==endYear?`${startYear}–${endYear}`:startYear;
+  // Returns display fields. totalSeasons = # of AIRED seasons (0 for an unaired premiere).
+  const{currentSeason:cur,upcomingSeason:upc,totalSeasons:numSeasons,releasedSeasons,firstAirDate:fa}=dets;
+  const aired=releasedSeasons||0;
+  const yr=tvYearRange(fa,cur?.date);
   if(cat==='rewatch'){
-    const n=totalSeasons||1;
+    const n=aired||numSeasons||1;
     return{seasonNote:n>1?`Season 1–${n}`:'Season 1',yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
   }
   if(cat==='released'||cat==='favorite'){
-    const n=releasedSeasons||totalSeasons||null;
+    const n=aired||numSeasons||null;
     return{seasonNote:n>1?`Season 1–${n}`:(n===1?'Season 1':''),yearRange:yr,totalSeasons:n,firstAirDate:fa||'',tmdbDate:cur?.date||''};
   }
-  // comingSoon (Ongoing)
-  return{totalSeasons:releasedSeasons||totalSeasons||null,firstAirDate:fa||'',tmdbDate:cur?.date||'',newSeasonDate:upc?.date||''};
+  // comingSoon — waiting for a premiere or a new season
+  return{
+    totalSeasons:aired||null,
+    firstAirDate:fa||'',
+    tmdbDate:cur?.date||'',
+    newSeasonDate:upc?.date||'',
+    // A returning show (has aired seasons) with a dated upcoming season is implicitly "announced"
+    newSeasonAnnounced:aired>0&&!!upc?.date,
+  };
 }
 
 function applyTVDets(item,dets){
@@ -692,6 +707,38 @@ async function fetchItem(item){
     Object.assign(update,tvUpd);
   }
   return update;
+}
+
+// Re-query TMDB for an existing item (used by pull-to-refresh): refresh release dates,
+// streaming availability, in-theaters status, and TV season/air-date info.
+async function refreshItem(item){
+  if(item.favorite||item.category==='favorite')return null; // leave favorites untouched
+  try{
+    if(item.type==='movie'){
+      const results=await tmdbSearch(item.title,'movie');
+      if(!results.length)return null;
+      const r=(item.tmdbId&&results.find(x=>x.tmdbId===item.tmdbId))||results[0];
+      const upd={tmdbId:r.tmdbId,tmdbDate:r.date||item.tmdbDate,
+        poster:r.poster||item.poster,description:r.description||item.description};
+      const pvs=await getProviders(r.tmdbId,'movie');
+      if(pvs.length)upd.streaming=pvs;
+      return upd;
+    }
+    if(!item.tmdbId)return null;
+    const dets=await fetchTVDetails(item.tmdbId);
+    if(!dets)return null;
+    const upd={firstAirDate:dets.firstAirDate||item.firstAirDate,tvDetailsFetched:true};
+    if(item.category==='comingSoon'){
+      upd.totalSeasons=dets.releasedSeasons||null;
+      upd.tmdbDate=dets.currentSeason?.date||item.tmdbDate;
+      upd.newSeasonDate=dets.upcomingSeason?.date||item.newSeasonDate||'';
+    }else{
+      Object.assign(upd,buildTVDisplay(dets,item.category==='rewatch'?'rewatch':'released'));
+    }
+    const pvs=await getProviders(item.tmdbId,'tv');
+    if(pvs.length)upd.streaming=pvs;
+    return upd;
+  }catch{return null;}
 }
 
 async function fetchMCUItem(item){
@@ -740,7 +787,24 @@ function autoMove(items){
   const now=Date.now(),DAYS=45;
   return items.map(i=>{
     // TV shows are never in theaters
-    if(i.type==='tv') return i.inTheaters?{...i,inTheaters:false}:i;
+    if(i.type==='tv'){
+      let it=i.inTheaters?{...i,inTheaters:false}:i;
+      if(it.category==='comingSoon'){
+        // Trigger date: an announced new season uses its (known) date; a premiere uses its first air date.
+        // An announced-but-undated season has no trigger — it waits in Coming Soon.
+        const trigger=it.newSeasonAnnounced?it.newSeasonDate:(it.firstAirDate||it.tmdbDate);
+        const d=parseDate(trigger);
+        if(d&&d.getTime()<=now){
+          const aired=it.totalSeasons||0;
+          const newTotal=aired>0?aired+1:1;   // the awaited season has now aired
+          return{...it,category:'released',newSeasonAnnounced:false,newSeasonDate:'',
+            totalSeasons:newTotal,tmdbDate:trigger,
+            yearRange:tvYearRange(it.firstAirDate,trigger),
+            seasonNote:newTotal>1?`Season 1–${newTotal}`:'Season 1'};
+        }
+      }
+      return it;
+    }
     if(i.category==='comingSoon'){
       const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
       if(!d||d.getTime()>now)return i;
@@ -768,6 +832,20 @@ function formatDate(item){
   if(item.category==='comingSoon'||item.inTheaters)
     return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   return String(d.getFullYear());
+}
+
+// The relevant upcoming date for a Coming Soon TV show.
+// Announced new season → its date (may be unknown/TBD). Premiere → the first air date.
+function tvUpcomingDate(item){
+  if(item.newSeasonAnnounced)return item.newSeasonDate||'';
+  return item.firstAirDate||item.tmdbDate||'';
+}
+// "Mar 5, 2026" style; falls back to a bare year or "TBD"
+function fmtFullDate(dateStr){
+  const d=parseDate(dateStr);
+  if(d)return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  if(dateStr&&/^\d{4}$/.test(dateStr.trim()))return dateStr.trim();
+  return 'TBD';
 }
 
 function sortedItems(arr,sec,type){
@@ -816,25 +894,25 @@ function Badge({svc,note}){
 }
 
 function Card({item,onTap}){
-  const isOngoing=item.type==='tv'&&item.category==='comingSoon';
+  const isTV=item.type==='tv';
+  const isComingSoon=isTV&&item.category==='comingSoon';
+  const isWatch=isTV&&item.category==='released';
+  const hasSeasons=(item.totalSeasons||0)>0;
 
-  // Season / status line
-  let seasonLine='';
-  if(isOngoing){
-    if(item.newSeasonAnnounced){
-      const d=item.newSeasonDate?parseDate(item.newSeasonDate):null;
-      const ds=d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-      seasonLine=`New season coming${ds?` · ${ds}`:''}`;
-    }else{
-      const w=item.watchedSeasons?.length||0,t=item.totalSeasons||0;
-      seasonLine=t>0?(w>0?`${w}/${t} seasons watched`:`${t} seasons`):'';
-    }
+  // Season / status line + date line
+  let seasonLine='',dateStr='';
+  if(isComingSoon){
+    // Waiting on a premiere or a new season — surface the date
+    seasonLine=hasSeasons?'New season':'Premiere';
+    dateStr=fmtFullDate(tvUpcomingDate(item));
+  }else if(isWatch){
+    const w=item.watchedSeasons?.length||0,t=item.totalSeasons||0;
+    seasonLine=t>0?(w>=t?'✓ Caught up':(w>0?`${w}/${t} seasons watched`:item.seasonNote||`${t} seasons`)):(item.seasonNote||'');
+    dateStr=formatDate(item);
   }else{
     seasonLine=item.seasonNote||'';
+    dateStr=formatDate(item);
   }
-
-  // Date line — hide for Ongoing (info already in seasonLine)
-  const dateStr=isOngoing?'':formatDate(item);
 
   return(
     <div className="card" onClick={()=>onTap(item)}>
@@ -943,32 +1021,56 @@ function FavoritesView({items,tab,onTap}){
     );
   }
   const bpMovies=favs.filter(i=>i.bestPictureYear);
+  const[favView,setFavView]=useState('genre');
+  const byDateDesc=(a,b)=>{
+    const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
+    const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
+    if(!da&&!db)return a.title.localeCompare(b.title);
+    if(!da)return 1;if(!db)return-1;
+    return db.getTime()-da.getTime();
+  };
+  const movieYear=i=>{
+    const d=parseDate(i.tmdbDate)||parseDate(i.userDate);
+    if(d)return d.getFullYear();
+    const m=(i.yearRange||'').match(/(\d{4})/);
+    return m?+m[1]:null;
+  };
+  // Build descending list of years present
+  const years=Array.from(new Set(favs.map(movieYear).filter(Boolean))).sort((a,b)=>b-a);
+
   return(
     <div className="fav-view">
       {!favs.length&&<div className="empty">No movie favorites yet — tap ⭐ in a movie's detail</div>}
       {favs.length>0&&(
         <>
           <BestPictureSection items={bpMovies} onTap={onTap}/>
-          {GENRES.map(g=>{
-            const gi=favs.filter(i=>i.genre===g).sort((a,b)=>{
-              const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
-              const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
-              if(!da&&!db)return a.title.localeCompare(b.title);
-              if(!da)return 1;if(!db)return-1;
-              return db.getTime()-da.getTime();
-            });
-            return<GenreSection key={g} genre={g} items={gi} onTap={onTap}/>;
-          })}
-          {(()=>{
-            const unc=favs.filter(i=>!i.genre).sort((a,b)=>{
-              const da=parseDate(a.tmdbDate)||parseDate(a.userDate);
-              const db=parseDate(b.tmdbDate)||parseDate(b.userDate);
-              if(!da&&!db)return a.title.localeCompare(b.title);
-              if(!da)return 1;if(!db)return-1;
-              return db.getTime()-da.getTime();
-            });
-            return unc.length?<GenreSection genre="Uncategorized" items={unc} onTap={onTap}/>:null;
-          })()}
+          <div className="intent-toggle" style={{marginBottom:14}}>
+            <button className={`intent-btn${favView==='genre'?' on':''}`} onClick={()=>setFavView('genre')}>Genres</button>
+            <button className={`intent-btn${favView==='year'?' on':''}`} onClick={()=>setFavView('year')}>Years</button>
+          </div>
+          {favView==='genre'?(
+            <>
+              {GENRES.map(g=>{
+                const gi=favs.filter(i=>i.genre===g).sort(byDateDesc);
+                return<GenreSection key={g} genre={g} items={gi} onTap={onTap}/>;
+              })}
+              {(()=>{
+                const unc=favs.filter(i=>!i.genre).sort(byDateDesc);
+                return unc.length?<GenreSection genre="Uncategorized" items={unc} onTap={onTap}/>:null;
+              })()}
+            </>
+          ):(
+            <>
+              {years.map(yr=>{
+                const yi=favs.filter(i=>movieYear(i)===yr).sort(byDateDesc);
+                return<GenreSection key={yr} genre={String(yr)} items={yi} onTap={onTap}/>;
+              })}
+              {(()=>{
+                const unk=favs.filter(i=>!movieYear(i)).sort(byDateDesc);
+                return unk.length?<GenreSection genre="Unknown year" items={unk} onTap={onTap}/>:null;
+              })()}
+            </>
+          )}
         </>
       )}
     </div>
@@ -1067,26 +1169,29 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
   const[sznFetching,setSznFetching]=React.useState(false);
 
   const isTV=item.type==='tv';
-  const isStart=isTV&&item.category==='released';
-  const isOngoing=isTV&&item.category==='comingSoon';
+  const isWatch=isTV&&item.category==='released';
+  const isComingSoon=isTV&&item.category==='comingSoon';
+  const isRewatch=isTV&&item.category==='rewatch';
   const isMovie=item.type==='movie';
+  const hasSeasons=(item.totalSeasons||0)>0;
+  // The "New season announced" toggle lives in Watch (to move forward) and on
+  // returning shows in Coming Soon (to move back). True premieres have no toggle.
+  const showNewSznToggle=isWatch||(isComingSoon&&hasSeasons);
+  const showSeasonGrid=(isWatch||isComingSoon)&&hasSeasons;
 
-  // Hero meta line
-  let heroSub='';
-  if(isOngoing){
-    if(newSznOn){
-      const d=newSznDate?parseDate(newSznDate):null;
-      const ds=d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
-      heroSub=`New season coming${ds?` · ${ds}`:''}`;
-    }else{
-      const w=watched.size,t=item.totalSeasons||0;
-      heroSub=t>0?(w>0?`${w}/${t} seasons watched`:`${t} seasons`):'';
-    }
+  // Hero meta line + date
+  let heroSub='',date='';
+  if(isComingSoon){
+    heroSub=hasSeasons?'New season coming':'Premieres';
+    date=fmtFullDate(tvUpcomingDate(item));
+  }else if(isWatch){
+    const w=watched.size,t=item.totalSeasons||0;
+    heroSub=t>0?(w>=t?'✓ Caught up':(w>0?`${w}/${t} seasons watched`:`${t} season${t>1?'s':''}`)):(item.seasonNote||'');
+    date=formatDate(item);
   }else{
     heroSub=item.seasonNote||'';
+    date=formatDate(item);
   }
-  const showDate=!isOngoing;
-  const date=showDate?formatDate(item):'';
 
   const toggleSeason=s=>{
     setWatched(prev=>{
@@ -1100,39 +1205,30 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
     setWatched(n);onUpdateItem(item.id,{watchedSeasons:Array.from(n)});
   };
 
+  // In Watch: turning the toggle ON moves the show to Coming Soon (a new season is awaited).
+  // In Coming Soon: turning it OFF moves the show back to Watch.
   const handleNewSzn=async checked=>{
     setNewSznOn(checked);
-    if(checked){
+    if(isWatch&&checked){
+      setMoving(true);
       let d=item.newSeasonDate||'';
-      if(!d&&item.tmdbId){
+      if(item.tmdbId){
         setSznFetching(true);
         const dets=await fetchTVDetails(item.tmdbId);
-        d=dets?.upcomingSeason?.date||'';
+        d=dets?.upcomingSeason?.date||d;
         setSznFetching(false);
       }
-      setNewSznDate(d);
-      onUpdateItem(item.id,{newSeasonAnnounced:true,newSeasonDate:d});
-    }else{
-      onUpdateItem(item.id,{newSeasonAnnounced:false});
+      onUpdateItem(item.id,{category:'comingSoon',newSeasonAnnounced:true,newSeasonDate:d,
+        watchedSeasons:Array.from(watched),tvDetailsFetched:true});
+      setMoving(false);onClose();
+    }else if(isComingSoon&&!checked){
+      setMoving(true);
+      const n=item.totalSeasons||0;
+      onUpdateItem(item.id,{category:'released',newSeasonAnnounced:false,newSeasonDate:'',
+        yearRange:tvYearRange(item.firstAirDate,item.tmdbDate),
+        seasonNote:n>1?`Season 1–${n}`:(n===1?'Season 1':'')});
+      setMoving(false);onClose();
     }
-  };
-
-  const handleMoveToOngoing=async()=>{
-    setMoving(true);
-    const upd={category:'comingSoon',watchedSeasons:item.watchedSeasons||[]};
-    if(item.tmdbId){
-      const dets=await fetchTVDetails(item.tmdbId);
-      if(dets){
-        Object.assign(upd,{
-          totalSeasons:dets.releasedSeasons||dets.totalSeasons||null,
-          newSeasonDate:dets.upcomingSeason?.date||'',
-          tmdbDate:dets.currentSeason?.date||item.tmdbDate,
-          firstAirDate:dets.firstAirDate||item.firstAirDate||'',
-          tvDetailsFetched:true,
-        });
-      }
-    }
-    onUpdateItem(item.id,upd);setMoving(false);onClose();
   };
 
   const handleMoveToRewatch=async()=>{
@@ -1176,7 +1272,7 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
                   <a key={svc} className="watch-link" href={url} target="_blank" rel="noopener noreferrer"
                      style={{background:s.bg,color:s.fg}}
                      onClick={e=>e.stopPropagation()}>
-                    Watch on {svc}
+                    {isComingSoon?'Will be available on':'Watch on'} {svc}
                   </a>
                 ):null;
               })}
@@ -1184,7 +1280,7 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
           )}
           {item.description&&<p className="dm-desc">{item.description}</p>}
 
-          {isOngoing&&item.totalSeasons>0&&(
+          {showSeasonGrid&&(
             <div>
               <div className="season-label">Seasons watched</div>
               <button className={`season-cb-all${watched.size===item.totalSeasons?' on':''}`} onClick={toggleAll}>
@@ -1200,18 +1296,18 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
             </div>
           )}
 
-          {isOngoing&&(
-            <div className={`nsz-toggle${newSznOn?' on':''}`} onClick={()=>!sznFetching&&handleNewSzn(!newSznOn)}>
+          {showNewSznToggle&&(
+            <div className={`nsz-toggle${newSznOn?' on':''}`} onClick={()=>!sznFetching&&!moving&&handleNewSzn(!newSznOn)}>
               <span className={`nsz-check${newSznOn?' on':''}`}>
-                {sznFetching?<span className="spinner"/>:(newSznOn?'✓':'○')}
+                {(sznFetching||moving)?<span className="spinner"/>:(newSznOn?'✓':'○')}
               </span>
               <div className="nsz-text">
                 <div className="nsz-label">New season announced</div>
-                {newSznOn&&newSznDate&&(
-                  <div className="nsz-date">
-                    {parseDate(newSznDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||newSznDate}
-                  </div>
-                )}
+                <div className="nsz-date">
+                  {isComingSoon&&item.newSeasonDate
+                    ?(parseDate(item.newSeasonDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||item.newSeasonDate)
+                    :(isWatch?'Turn on to move to Coming Soon':'')}
+                </div>
               </div>
             </div>
           )}
@@ -1219,12 +1315,7 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
           <div className="dm-actions">
             <button className="btn" onClick={onClose}>Close</button>
             <button className="btn btn-danger" onClick={()=>{onRemove(item.id);onClose();}}>Remove</button>
-            {isStart&&(
-              <button className="move-btn" onClick={handleMoveToOngoing} disabled={moving}>
-                {moving?<span className="spinner"/>:'Move to Ongoing →'}
-              </button>
-            )}
-            {isOngoing&&(
+            {isWatch&&(
               <button className="move-btn" onClick={handleMoveToRewatch} disabled={moving}>
                 {moving?<span className="spinner"/>:'Move to Rewatch →'}
               </button>
@@ -1523,7 +1614,7 @@ function AddModal({onClose,onAdd,onAddMCU}){
     const dets=await fetchTVDetails(r.tmdbId);
     setTvDets(dets);
     if(dets){
-      setTvSeasons(dets.releasedSeasons||dets.totalSeasons||0);
+      setTvSeasons(dets.releasedSeasons||0);   // aired seasons only; 0 = premiere
       if(dets.upcomingSeason){setNewSznOn(true);setNewSznDate(dets.upcomingSeason.date||'');}
     }
     setTvFetching(false);
@@ -1582,15 +1673,18 @@ function AddModal({onClose,onAdd,onAddMCU}){
         onAdd({...base,id:uid(),type:'tv',category:'favorite',title,
           showKey:sk,tvDetailsFetched:true,favorite:true,...tvUpd});
       }else if(tvCat==='comingSoon'){
-        // Ongoing — data already fetched in selectResult
+        // Coming Soon — data already fetched in selectResult.
+        // Returning show (has aired seasons) → awaiting a new season.
+        // Premiere (no aired seasons) → awaiting the first air date.
+        const isPremiere=!tvSeasons;
         onAdd({...base,id:uid(),type:'tv',category:'comingSoon',title,
           showKey:sk,tvDetailsFetched:!!tvDets,
           totalSeasons:tvSeasons||null,
           watchedSeasons:Array.from(watchedSeasons),
           tmdbDate:tvDets?.currentSeason?.date||sel?.date||'',
-          firstAirDate:tvDets?.firstAirDate||'',
-          newSeasonAnnounced:newSznOn,
-          newSeasonDate:newSznOn?(newSznDate||''):'',
+          firstAirDate:tvDets?.firstAirDate||sel?.date||'',
+          newSeasonAnnounced:isPremiere?false:newSznOn,
+          newSeasonDate:isPremiere?'':(newSznOn?(newSznDate||''):''),
         });
       }else{
         // Start or Rewatch — fetch details now
@@ -1682,14 +1776,14 @@ function AddModal({onClose,onAdd,onAddMCU}){
           </div>
         )}
 
-        {/* Ongoing panel */}
+        {/* Coming Soon panel */}
         {isOngoing&&sel&&(
           <div className="tv-sp">
-            <div className="tv-sp-title">Seasons watched</div>
             {tvFetching?(
               <div style={{color:'var(--text2)',fontSize:13,display:'flex',alignItems:'center',gap:8}}>Loading season info <span className="spinner"/></div>
             ):tvSeasons>0?(
               <>
+                <div className="tv-sp-title">Seasons watched so far</div>
                 <button className={`season-cb-all${watchedSeasons.size===tvSeasons?' on':''}`} onClick={toggleAll}>
                   {watchedSeasons.size===tvSeasons?'✓ All seasons':'Select all'}
                 </button>
@@ -1700,17 +1794,24 @@ function AddModal({onClose,onAdd,onAddMCU}){
                     </button>
                   ))}
                 </div>
+                <div className={`nsz-toggle${newSznOn?' on':''}`} style={{marginBottom:0}} onClick={()=>setNewSznOn(v=>!v)}>
+                  <span className={`nsz-check${newSznOn?' on':''}`}>{newSznOn?'✓':'○'}</span>
+                  <div className="nsz-text">
+                    <div className="nsz-label">New season announced</div>
+                    {newSznOn&&newSznDate&&<div className="nsz-date">{parseDate(newSznDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||newSznDate}</div>}
+                  </div>
+                </div>
               </>
             ):(
-              <div style={{color:'var(--text2)',fontSize:13}}>No season info found</div>
+              <>
+                <div className="tv-sp-title">Premiere</div>
+                <div style={{color:'var(--text2)',fontSize:13}}>
+                  {tvDets?.firstAirDate
+                    ?`Premieres ${parseDate(tvDets.firstAirDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||tvDets.firstAirDate}`
+                    :"Hasn't aired yet — we'll move it to Watch once it premieres."}
+                </div>
+              </>
             )}
-            <div className={`nsz-toggle${newSznOn?' on':''}`} style={{marginBottom:0}} onClick={()=>setNewSznOn(v=>!v)}>
-              <span className={`nsz-check${newSznOn?' on':''}`}>{newSznOn?'✓':'○'}</span>
-              <div className="nsz-text">
-                <div className="nsz-label">New season announced</div>
-                {newSznOn&&newSznDate&&<div className="nsz-date">{parseDate(newSznDate)?.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})||newSznDate}</div>}
-              </div>
-            </div>
           </div>
         )}
 
@@ -1727,6 +1828,34 @@ function AddModal({onClose,onAdd,onAddMCU}){
   );
 }
 
+// Touch pull-to-refresh: returns how far (px) the user has pulled while at the top of the page.
+function usePullToRefresh(onRefresh){
+  const[pull,setPull]=useState(0);
+  const startY=useRef(null);
+  const cb=useRef(onRefresh);
+  useEffect(()=>{cb.current=onRefresh;},[onRefresh]);
+  useEffect(()=>{
+    const TH=70;
+    const atTop=()=>(window.scrollY||document.documentElement.scrollTop||0)<=0;
+    const ts=e=>{startY.current=atTop()?e.touches[0].clientY:null;};
+    const tm=e=>{
+      if(startY.current==null)return;
+      const dy=e.touches[0].clientY-startY.current;
+      setPull(dy>0&&atTop()?Math.min(dy*0.5,80):0);
+    };
+    const te=()=>{
+      if(startY.current==null)return;
+      setPull(p=>{if(p>=TH)cb.current&&cb.current();return 0;});
+      startY.current=null;
+    };
+    document.addEventListener('touchstart',ts,{passive:true});
+    document.addEventListener('touchmove',tm,{passive:true});
+    document.addEventListener('touchend',te,{passive:true});
+    return()=>{document.removeEventListener('touchstart',ts);document.removeEventListener('touchmove',tm);document.removeEventListener('touchend',te);};
+  },[]);
+  return pull;
+}
+
 /* ── APP ── */
 function App(){
   const[items,setItems]=useState(()=>{
@@ -1734,13 +1863,27 @@ function App(){
       const seen=new Set(base.map(i=>`${i.type}:${i.title.toLowerCase()}`));
       return[...base,...extra.filter(f=>!seen.has(`${f.type}:${f.title.toLowerCase()}`))];
     };
+    // v8: "Watch" is now the active-tracking bucket. A returning show that was sitting in
+    // Coming Soon purely for season tracking (aired seasons, no new season announced) belongs in Watch.
+    const migrateTV=arr=>arr.map(i=>{
+      if(i.type!=='tv'||i.category!=='comingSoon')return i;
+      const aired=i.totalSeasons||0;
+      if(aired>0&&!i.newSeasonAnnounced){
+        return{...i,category:'released',
+          yearRange:i.yearRange||tvYearRange(i.firstAirDate,i.tmdbDate),
+          seasonNote:aired>1?`Season 1–${aired}`:'Season 1'};
+      }
+      return i; // announced returning show OR not-yet-aired premiere stays in Coming Soon
+    });
     try{
+      const s8=localStorage.getItem('watchlist-v8');
+      if(s8)return autoMove(JSON.parse(s8));
       const s7=localStorage.getItem('watchlist-v7');
-      if(s7)return autoMove(JSON.parse(s7));
+      if(s7)return autoMove(migrateTV(JSON.parse(s7)));
       const s6=localStorage.getItem('watchlist-v6');
-      if(s6)return autoMove(merge(JSON.parse(s6),FAVS_DATA));
+      if(s6)return autoMove(migrateTV(merge(JSON.parse(s6),FAVS_DATA)));
       const s5=localStorage.getItem('watchlist-v5');
-      if(s5)return autoMove(merge(JSON.parse(s5).map(i=>({favorite:false,genre:'',isCrown:false,bestPictureYear:null,...i})),FAVS_DATA));
+      if(s5)return autoMove(migrateTV(merge(JSON.parse(s5).map(i=>({favorite:false,genre:'',isCrown:false,bestPictureYear:null,...i})),FAVS_DATA)));
     }catch{}
     return autoMove([...DATA,...FAVS_DATA]);
   });
@@ -1754,6 +1897,9 @@ function App(){
   const[done,setDone]=useState(0);
   const[total,setTotal]=useState(0);
   const[fetching,setFetching]=useState(false);
+  const[refreshing,setRefreshing]=useState(false);
+  const itemsRef=useRef(items);
+  const refreshingRef=useRef(false);
   const[mcuItems,setMcuItems]=useState(()=>{
     try{const s=localStorage.getItem('mcu-v1');if(s)return JSON.parse(s);}catch{}
     return MCU_DATA;
@@ -1764,7 +1910,7 @@ function App(){
   });
 
   useEffect(()=>{
-    try{localStorage.setItem('watchlist-v7',JSON.stringify(items));}catch{}
+    try{localStorage.setItem('watchlist-v8',JSON.stringify(items));}catch{}
   },[items]);
   useEffect(()=>{
     try{localStorage.setItem('mcu-v1',JSON.stringify(mcuItems));}catch{}
@@ -1826,6 +1972,23 @@ function App(){
     setDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);
   },[]);
 
+  useEffect(()=>{itemsRef.current=items;},[items]);
+
+  const refreshData=useCallback(async()=>{
+    if(refreshingRef.current)return;
+    refreshingRef.current=true;setRefreshing(true);
+    const snap=itemsRef.current.filter(i=>!i.favorite&&i.category!=='favorite');
+    const apply=(id,upd)=>setItems(prev=>{
+      const idx=prev.findIndex(x=>x.id===id);if(idx===-1)return prev;
+      const n=[...prev];n[idx]={...n[idx],...upd};return n;
+    });
+    const tasks=snap.map(it=>async()=>{const upd=await refreshItem(it);if(upd)apply(it.id,upd);});
+    await runQ(tasks,5);
+    setItems(prev=>autoMove(prev));
+    refreshingRef.current=false;setRefreshing(false);
+  },[]);
+  const pull=usePullToRefresh(refreshData);
+
   const addItem=useCallback(item=>setItems(p=>[...p,item]),[]);
   const addMCUItem=useCallback(item=>{
     setMcuItems(p=>[...p,item]);
@@ -1871,9 +2034,18 @@ function App(){
       ?[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
       :[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
 
+  const ptrOffset=refreshing?52:pull;
   return(
     <>
-      <div className="hdr">
+      {(pull>0||refreshing)&&(
+        <div className="ptr" style={{transform:`translateY(${ptrOffset-52}px)`,opacity:Math.min((ptrOffset)/52,1)}}>
+          {refreshing
+            ?<><span className="spinner"/> Refreshing…</>
+            :<><span className={`ptr-arrow${pull>=70?' ready':''}`}>↓</span> {pull>=70?'Release to refresh':'Pull to refresh'}</>
+          }
+        </div>
+      )}
+      <div className="hdr" style={{transform:refreshing?'translateY(52px)':`translateY(${Math.min(pull,52)}px)`,transition:pull>0?'none':'transform .2s'}}>
         <div className="hdr-top">
           <div className="hdr-title">
             🍿 Watchlist
