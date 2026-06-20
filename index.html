@@ -233,7 +233,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
+<script type="text/jsx-source" id="app-source">
 const{useState,useEffect,useCallback,useRef,useMemo}=React;
 
 const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjVhMWIxMzA0ZjNjMzA1NjVhMGMxNGQxZDI2MzM1NSIsIm5iZiI6MTc3OTA1ODQxNS4yMDQsInN1YiI6IjZhMGE0NmVmMjc0YmRmZjdkNzFlNzJiMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.HM8iWYDC4djozp5-2lEjq1pi1Gy7NYaaF7kZ0W1I8N4';
@@ -2120,6 +2120,17 @@ function App(){
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script>
+(function () {
+  const src = document.getElementById('app-source').textContent;
+  const out = Babel.transform(src, {
+    presets: [['react', { runtime: 'classic' }]],
+  }).code;
+  const s = document.createElement('script');
+  s.textContent = out;
+  document.body.appendChild(s);
+})();
 </script>
 </body>
 </html>
