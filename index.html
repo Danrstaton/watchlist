@@ -502,7 +502,7 @@ const FAVS_DATA=[
 
 /* ── MCU DATA ── */
 const MCU_PHASES=['Phase 1','Phase 2','Phase 3','Phase 4','Phase 5','Phase 6','Announced','Rumored'];
-const mkMCU=(title,phase,date,watched,type='movie')=>({id:uid(),title,phase,releaseDate:date,watched:!!watched,type,poster:null,description:'',tmdbId:null,tmdbFetched:false});
+const mkMCU=(title,phase,date,watched,type='movie')=>({id:uid(),title,phase,releaseDate:date,watched:!!watched,type,season:'',poster:null,description:'',tmdbId:null,tmdbFetched:false});
 
 const MCU_DATA=(()=>{
   const m=(t,p,d,w=true)=>mkMCU(t,p,d,w,'movie');
@@ -1331,6 +1331,13 @@ function DetailModal({item,onClose,onWatched,onRemove,onUpdateItem}){
 }
 
 /* ── MCU COMPONENTS ── */
+// Prefer an explicit season field; otherwise fall back to a "(S1)" suffix in the title.
+function mcuSeasonLabel(item){
+  if(item.season)return`Season ${item.season}`;
+  const m=(item.title||'').match(/\([Ss](\d+)\)/);
+  return m?`Season ${m[1]}`:'';
+}
+
 function MCURow({item,onToggleWatched,onTap}){
   return(
     <div className="mcu-row">
@@ -1346,7 +1353,7 @@ function MCURow({item,onToggleWatched,onTap}){
         <div className="mcu-title">{item.title.replace(/\s*\([Ss]\d+\)/,'')}</div>
         <div style={{display:'flex',alignItems:'baseline',gap:6}}>
           {item.releaseDate&&<div className="mcu-date">{item.releaseDate}</div>}
-          {/\([Ss](\d+)\)/.test(item.title)&&<span className="mcu-season">Season {item.title.match(/\([Ss](\d+)\)/)[1]}</span>}
+          {mcuSeasonLabel(item)&&<span className="mcu-season">{mcuSeasonLabel(item)}</span>}
         </div>
       </div>
     </div>
@@ -1372,6 +1379,14 @@ function MCUListView({mcuItems,onToggleWatched,onTap}){
   const byPhase={};
   MCU_PHASES.forEach(p=>{byPhase[p]=[];});
   mcuItems.forEach(i=>{if(byPhase[i.phase])byPhase[i.phase].push(i);});
+  // Order each phase chronologically by release date; undated entries fall to the end.
+  MCU_PHASES.forEach(p=>{
+    byPhase[p].sort((a,b)=>{
+      const da=parseDate(a.releaseDate),db=parseDate(b.releaseDate);
+      if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
+      return da-db;
+    });
+  });
   return(
     <div>
       {MCU_PHASES.map(phase=>{
@@ -1407,7 +1422,7 @@ function MCURankRow({item,rank,total,isFirst,isLast,onMoveUp,onMoveDown,onMoveTo
       }
       <div className="mcu-rank-info" onClick={()=>onTap(item)}>
         <div className="mcu-rank-title">{item.title.replace(/\s*\([Ss]\d+\)/,'')}</div>
-        <div className="mcu-rank-sub">{item.phase}{item.releaseDate?` · ${item.releaseDate}`:''}</div>
+        <div className="mcu-rank-sub">{[item.phase,item.releaseDate,mcuSeasonLabel(item)].filter(Boolean).join(' · ')}</div>
       </div>
       <div className="mcu-arrows">
         <button className="mcu-arrow" onClick={onMoveUp} disabled={isFirst}>▲</button>
@@ -1446,6 +1461,7 @@ function MCUDetailModal({item,onClose,onUpdate,onRemove}){
   const[phase,setPhase]=useState(item.phase||'Phase 1');
   const[type,setType]=useState(item.type||'movie');
   const[date,setDate]=useState(item.releaseDate||'');
+  const[season,setSeason]=useState(item.season||'');
   const[watched,setWatched]=useState(!!item.watched);
   const commit=patch=>onUpdate(item.id,patch);
 
@@ -1481,9 +1497,17 @@ function MCUDetailModal({item,onClose,onUpdate,onRemove}){
             </div>
           </div>
 
+          {type==='tv'&&(
+            <div style={{marginBottom:10}}>
+              <div className="season-label">Season</div>
+              <input className="minput" style={{marginBottom:0}} placeholder="e.g. 1 or 1–2" value={season}
+                onChange={e=>{setSeason(e.target.value);commit({season:e.target.value});}}/>
+            </div>
+          )}
+
           <div style={{marginBottom:14}}>
             <div className="season-label">Release date</div>
-            <input className="minput" style={{marginBottom:0}} placeholder="e.g. May 2, 2008" value={date}
+            <input className="minput" style={{marginBottom:0}} placeholder="e.g. 5/2/08" value={date}
               onChange={e=>{setDate(e.target.value);commit({releaseDate:e.target.value});}}/>
           </div>
 
