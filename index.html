@@ -1441,7 +1441,14 @@ function MCURankingsView({mcuItems,ranking,onRankChange,onTap}){
   );
 }
 
-function MCUDetailModal({item,onClose}){
+function MCUDetailModal({item,onClose,onUpdate,onRemove}){
+  const[title,setTitle]=useState(item.title||'');
+  const[phase,setPhase]=useState(item.phase||'Phase 1');
+  const[type,setType]=useState(item.type||'movie');
+  const[date,setDate]=useState(item.releaseDate||'');
+  const[watched,setWatched]=useState(!!item.watched);
+  const commit=patch=>onUpdate(item.id,patch);
+
   return(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="dm-outer" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -1450,15 +1457,39 @@ function MCUDetailModal({item,onClose}){
         </div>
         <div className="dm-sheet">
           <div className="dm-sheet-drag"/>
-          <div className="dm-sheet-title">{item.title}</div>
-          <div className="dm-sheet-meta">
-            <span style={{color:'var(--text2)',fontSize:12}}>{item.phase}</span>
-            {item.releaseDate&&<span style={{color:'var(--accent)',fontSize:13,fontWeight:600}}>{item.releaseDate}</span>}
-            {item.type==='tv'&&<span className="badge" style={{background:'var(--card2)',color:'var(--text2)'}}>Series</span>}
-          </div>
+          <input className="minput" style={{fontSize:17,fontWeight:700,marginBottom:12}} value={title}
+            onChange={e=>{setTitle(e.target.value);commit({title:e.target.value});}}/>
           {item.description&&<p className="dm-desc">{item.description}</p>}
+
+          <div className={`nsz-toggle${watched?' on':''}`} onClick={()=>{const v=!watched;setWatched(v);commit({watched:v});}}>
+            <span className={`nsz-check${watched?' on':''}`}>{watched?'✓':'○'}</span>
+            <div className="nsz-text"><div className="nsz-label">Watched</div></div>
+          </div>
+
+          <div style={{marginBottom:10}}>
+            <div className="season-label">Phase / Category</div>
+            <select className="msel" value={phase} onChange={e=>{setPhase(e.target.value);commit({phase:e.target.value});}}>
+              {MCU_PHASES.map(p=><option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+
+          <div style={{marginBottom:10}}>
+            <div className="season-label">Type</div>
+            <div className="intent-toggle" style={{marginBottom:0}}>
+              <button className={`intent-btn${type==='movie'?' on':''}`} onClick={()=>{setType('movie');commit({type:'movie'});}}>Movie</button>
+              <button className={`intent-btn${type==='tv'?' on':''}`} onClick={()=>{setType('tv');commit({type:'tv'});}}>Series</button>
+            </div>
+          </div>
+
+          <div style={{marginBottom:14}}>
+            <div className="season-label">Release date</div>
+            <input className="minput" style={{marginBottom:0}} placeholder="e.g. May 2, 2008" value={date}
+              onChange={e=>{setDate(e.target.value);commit({releaseDate:e.target.value});}}/>
+          </div>
+
           <div className="dm-actions">
             <button className="btn" onClick={onClose}>Close</button>
+            <button className="btn btn-danger" onClick={()=>{onRemove(item.id);onClose();}}>Remove</button>
           </div>
         </div>
       </div>
@@ -1996,6 +2027,24 @@ function App(){
   },[]);
   const toggleMCUWatched=useCallback(id=>setMcuItems(p=>p.map(i=>i.id===id?{...i,watched:!i.watched}:i)),[]);
   const updateMCURanking=useCallback(r=>setMcuRanking(r),[]);
+  const updateMCUItem=useCallback((id,upd)=>{
+    setMcuItems(p=>p.map(i=>i.id===id?{...i,...upd}:i));
+    setMcuDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);
+    if('phase' in upd){
+      // Rumored items are excluded from the rankings list; keep it in sync
+      setMcuRanking(prev=>{
+        const inRank=prev.includes(id);
+        if(upd.phase==='Rumored'&&inRank)return prev.filter(x=>x!==id);
+        if(upd.phase!=='Rumored'&&!inRank)return[...prev,id];
+        return prev;
+      });
+    }
+  },[]);
+  const removeMCUItem=useCallback(id=>{
+    setMcuItems(p=>p.filter(i=>i.id!==id));
+    setMcuRanking(p=>p.filter(x=>x!==id));
+    setMcuDetail(null);
+  },[]);
 
   const importData=useCallback(d=>{
     if(Array.isArray(d)){setItems(autoMove(d));}
@@ -2112,7 +2161,7 @@ function App(){
           onUpdateItem={(id,upd)=>{updateItem(id,upd);setFavDetail(prev=>prev&&prev.id===id?{...prev,...upd}:prev);}}
         />
       )}
-      {mcuDetail&&<MCUDetailModal item={mcuDetail} onClose={()=>setMcuDetail(null)}/>}
+      {mcuDetail&&<MCUDetailModal item={mcuDetail} onClose={()=>setMcuDetail(null)} onUpdate={updateMCUItem} onRemove={removeMCUItem}/>}
       {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem} onAddMCU={addMCUItem}/>}
       {showSettings&&<SettingsModal onClose={()=>setShowSettings(false)} items={items} mcuItems={mcuItems} mcuRanking={mcuRanking} onImport={importData}/>}
     </>
