@@ -204,7 +204,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .crown-toggle{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-bottom:14px;padding:11px 14px;-webkit-tap-highlight-color:transparent;transition:border-color .2s}
 .crown-toggle.on{background:rgba(245,197,24,.08);border-color:#f5c518}
 /* MCU List */
-.mcu-row{align-items:center;border-bottom:1px solid var(--border);cursor:default;display:flex;gap:10px;padding:9px 0}
+.mcu-row{align-items:center;border-bottom:1px solid var(--border);cursor:default;display:flex;gap:9px;padding:9px 0}
+.mcu-reset{color:var(--text2);cursor:pointer;flex-shrink:0;font-size:14px;line-height:1;padding:2px 5px;-webkit-tap-highlight-color:transparent}
+.mcu-reset:hover{color:var(--accent)}
 .mcu-row:last-child{border-bottom:none}
 .mcu-check{align-items:center;background:none;border:2px solid var(--border);border-radius:5px;color:transparent;cursor:pointer;display:flex;flex-shrink:0;font-size:12px;font-weight:800;height:22px;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .15s;width:22px}
 .mcu-check.on{background:var(--green);border-color:var(--green);color:#fff}
@@ -222,6 +224,35 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mcu-rank-row{align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;gap:9px;margin-bottom:7px;padding:8px 10px;transition:box-shadow .15s}
 .mcu-rank-num{color:var(--accent);cursor:pointer;flex-shrink:0;font-size:15px;font-weight:800;min-width:26px;text-align:center}
 .mcu-rank-input{background:none;border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-size:13px;font-weight:800;padding:2px 0;text-align:center;width:38px}
+/* MCU stats */
+.st-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:20px}
+.st-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 13px}
+.st-val{color:var(--accent);font-size:21px;font-weight:800;line-height:1.1}
+.st-lab{color:var(--text2);font-size:10px;font-weight:700;letter-spacing:.6px;margin-top:5px;text-transform:uppercase}
+.st-sub{color:var(--text2);font-size:10px;margin-top:3px;opacity:.75}
+.st-sec{margin-bottom:24px}
+.st-sec-title{color:var(--text2);font-size:11px;font-weight:700;letter-spacing:.8px;margin-bottom:10px;text-transform:uppercase}
+.st-chart{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 10px 4px}
+.st-legend{display:flex;flex-wrap:wrap;gap:10px;padding:6px 4px 4px}
+.st-leg{align-items:center;color:var(--text2);display:flex;font-size:10px;gap:5px}
+.st-dot{border-radius:50%;flex-shrink:0;height:8px;width:8px}
+.st-cap{align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-top:10px;padding:10px 12px;-webkit-tap-highlight-color:transparent}
+.st-cap-rank{color:var(--accent);font-size:15px;font-weight:800;min-width:32px;text-align:center}
+.st-cap-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-cap-sub{color:var(--text2);font-size:10px;margin-top:2px}
+.st-hint{color:var(--text2);font-size:11px;padding:10px 4px 2px;text-align:center}
+.st-bar{margin-bottom:10px}
+.st-bar-top{align-items:baseline;display:flex;gap:7px;margin-bottom:5px}
+.st-bar-lab{color:var(--text);flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-bar-cnt{color:var(--text2);flex-shrink:0;font-size:10px}
+.st-bar-val{color:var(--accent);flex-shrink:0;font-size:11px;font-weight:700}
+.st-bar-track{background:rgba(255,255,255,.06);border-radius:3px;height:6px;overflow:hidden}
+.st-bar-fill{border-radius:3px;height:100%;transition:width .4s}
+.st-row{align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;gap:10px;margin-bottom:6px;padding:8px 11px;-webkit-tap-highlight-color:transparent}
+.st-row-rank{color:var(--accent);flex-shrink:0;font-size:14px;font-weight:800;min-width:26px;text-align:center}
+.st-row-info{flex:1;min-width:0}
+.st-row-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-row-sub{color:var(--text2);font-size:10px;margin-top:2px}
 .mcu-rank-info{cursor:pointer;flex:1;min-width:0}
 .mcu-rank-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mcu-rank-sub{color:var(--text2);font-size:10px;margin-top:2px}
@@ -501,7 +532,7 @@ const FAVS_DATA=[
 ];
 
 /* ── MCU DATA ── */
-const MCU_PHASES=['Phase 1','Phase 2','Phase 3','Phase 4','Phase 5','Phase 6','Announced','Rumored'];
+const MCU_PHASES=['Phase 1','Phase 2','Phase 3','Phase 4','Phase 5','Phase 6','Other Universes','Announced','Rumored'];
 const mkMCU=(title,phase,date,watched,type='movie')=>({id:uid(),title,phase,releaseDate:date,watched:!!watched,type,season:'',poster:null,description:'',tmdbId:null,tmdbFetched:false});
 
 const MCU_DATA=(()=>{
@@ -594,6 +625,80 @@ const MCU_DATA=(()=>{
     m('Thor 5','Rumored','',false),
   ];
 })();
+
+// Main heroes per entry — powers the "by character" stats. Keys are titles with any
+// "(S1)" suffix stripped, so every season of a show shares one entry.
+const MCU_CHARACTERS={
+  'Iron Man':['Iron Man'],
+  'The Incredible Hulk':['Hulk'],
+  'Iron Man 2':['Iron Man','Black Widow','War Machine'],
+  'Thor':['Thor','Loki','Hawkeye'],
+  'Captain America: The First Avenger':['Captain America','Winter Soldier'],
+  'The Avengers':['Iron Man','Captain America','Thor','Hulk','Black Widow','Hawkeye','Loki'],
+  'Iron Man 3':['Iron Man','War Machine'],
+  'Thor: The Dark World':['Thor','Loki'],
+  'Captain America: The Winter Soldier':['Captain America','Black Widow','Falcon','Winter Soldier'],
+  'Guardians of the Galaxy':['Star-Lord','Gamora','Drax','Rocket','Groot'],
+  'Avengers: Age of Ultron':['Iron Man','Captain America','Thor','Hulk','Black Widow','Hawkeye','Scarlet Witch','Vision'],
+  'Ant-Man':['Ant-Man','Falcon'],
+  'Captain America: Civil War':['Captain America','Iron Man','Black Widow','Falcon','Winter Soldier','Scarlet Witch','Vision','Ant-Man','Spider-Man','Black Panther','War Machine','Hawkeye'],
+  'Doctor Strange':['Doctor Strange'],
+  'Guardians of the Galaxy Vol. 2':['Star-Lord','Gamora','Drax','Rocket','Groot','Nebula','Mantis'],
+  'Spider-Man: Homecoming':['Spider-Man','Iron Man'],
+  'Thor: Ragnarok':['Thor','Loki','Hulk','Doctor Strange','Valkyrie'],
+  'Black Panther':['Black Panther','Shuri'],
+  'Avengers: Infinity War':['Iron Man','Captain America','Thor','Hulk','Black Widow','Doctor Strange','Spider-Man','Black Panther','Star-Lord','Gamora','Drax','Rocket','Groot','Nebula','Mantis','Scarlet Witch','Vision','Falcon','Winter Soldier','War Machine'],
+  'Ant-Man and the Wasp':['Ant-Man','Wasp'],
+  'Captain Marvel':['Captain Marvel','Nick Fury'],
+  'Avengers: Endgame':['Iron Man','Captain America','Thor','Hulk','Black Widow','Hawkeye','Ant-Man','Captain Marvel','War Machine','Rocket','Nebula','Doctor Strange','Spider-Man','Black Panther','Star-Lord','Falcon','Winter Soldier','Scarlet Witch','Wasp','Groot'],
+  'Spider-Man: Far From Home':['Spider-Man','Nick Fury'],
+  'WandaVision':['Scarlet Witch','Vision','Agatha Harkness','Monica Rambeau'],
+  'The Falcon and the Winter Soldier':['Falcon','Winter Soldier'],
+  'Loki':['Loki'],
+  'Black Widow':['Black Widow','Yelena','Red Guardian'],
+  'What If...?':['Captain Carter','Star-Lord','Doctor Strange','Loki'],
+  'Shang-Chi and the Legend of the Ten Rings':['Shang-Chi'],
+  'Eternals':['Eternals'],
+  'Hawkeye':['Hawkeye','Kate Bishop','Yelena','Kingpin'],
+  'Spider-Man: No Way Home':['Spider-Man','Doctor Strange'],
+  'Moon Knight':['Moon Knight'],
+  'Doctor Strange in the Multiverse of Madness':['Doctor Strange','Scarlet Witch','America Chavez'],
+  'Ms. Marvel':['Ms. Marvel'],
+  'Thor: Love and Thunder':['Thor','Valkyrie','Mighty Thor','Star-Lord'],
+  'I Am Groot':['Groot'],
+  'She-Hulk: Attorney at Law':['She-Hulk','Hulk','Daredevil','Wong'],
+  'Werewolf by Night':['Werewolf by Night'],
+  'Black Panther: Wakanda Forever':['Shuri','Black Panther','Namor'],
+  'Guardians of the Galaxy Holiday Special':['Star-Lord','Drax','Mantis'],
+  'Ant-Man and the Wasp: Quantumania':['Ant-Man','Wasp','Kang'],
+  'Guardians of the Galaxy Vol. 3':['Star-Lord','Gamora','Drax','Rocket','Groot','Nebula','Mantis'],
+  'Secret Invasion':['Nick Fury'],
+  'The Marvels':['Captain Marvel','Ms. Marvel','Monica Rambeau'],
+  'Echo':['Echo','Daredevil','Kingpin'],
+  "X-Men '97":['Wolverine','Cyclops','Storm','Jean Grey','Magneto'],
+  'Deadpool & Wolverine':['Deadpool','Wolverine'],
+  'Agatha All Along':['Agatha Harkness'],
+  'Your Friendly Neighborhood Spider-Man':['Spider-Man'],
+  'Captain America: Brave New World':['Captain America','Falcon','Red Hulk'],
+  'Daredevil: Born Again':['Daredevil','Kingpin','Punisher'],
+  'Thunderbolts*':['Yelena','Winter Soldier','Red Guardian','Ghost','Taskmaster'],
+  'Ironheart':['Ironheart'],
+  'The Fantastic Four: First Steps':['Fantastic Four'],
+  'Eyes of Wakanda':['Black Panther'],
+  'Marvel Zombies':['Scarlet Witch','Shang-Chi','Kate Bishop'],
+  'Wonder Man':['Wonder Man'],
+  'The Punisher: One Last Kill':['Punisher'],
+  'Spider-Man: Brand New Day':['Spider-Man'],
+  'Vision Quest':['Vision'],
+  'Avengers: Doomsday':['Avengers','Doctor Doom','Fantastic Four','Wolverine'],
+  'Avengers: Secret Wars':['Avengers','Doctor Doom'],
+  'Daredevil':['Daredevil'],
+  'Blade':['Blade'],
+  'Armor Wars':['War Machine'],
+  'Shang-Chi 2':['Shang-Chi'],
+  'Doctor Strange 3':['Doctor Strange'],
+  'Thor 5':['Thor'],
+};
 
 /* ── TMDB API ── */
 async function tmdbSearch(title,type){
@@ -748,7 +853,13 @@ async function fetchMCUItem(item){
     const results=await tmdbSearch(q,item.type);
     const r=results[0];
     if(!r)return{tmdbFetched:true};
-    return{poster:r.poster,description:r.description,tmdbId:r.tmdbId,tmdbFetched:true};
+    const upd={poster:r.poster,description:r.description,tmdbId:r.tmdbId,tmdbFetched:true};
+    // Fill in a release date if the entry has none, so it sorts and charts correctly
+    if(!item.releaseDate&&r.date){
+      const d=parseDate(r.date);
+      if(d)upd.releaseDate=`${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
+    }
+    return upd;
   }catch{return{tmdbFetched:true};}
 }
 
@@ -1338,13 +1449,47 @@ function mcuSeasonLabel(item){
   return m?`Season ${m[1]}`:'';
 }
 
-function MCURow({item,onToggleWatched,onTap}){
+// Title without its "(S1)" suffix — the key used by MCU_CHARACTERS.
+function mcuBaseTitle(t){return(t||'').replace(/\s*\([Ss]\d+\)/,'').trim();}
+function mcuChars(item){return MCU_CHARACTERS[mcuBaseTitle(item.title)]||[];}
+// Release year, tolerating loose dates like "Summer 2026" or "2027".
+function mcuYear(item){
+  const d=parseDate(item.releaseDate);
+  if(d)return d.getFullYear();
+  const m=(item.releaseDate||'').match(/(\d{4})/);
+  return m?+m[1]:null;
+}
+// Sortable timestamp; undated entries return null.
+function mcuTime(item){
+  const d=parseDate(item.releaseDate);
+  if(d)return d.getTime();
+  const y=mcuYear(item);
+  return y?new Date(y,6,1).getTime():null;
+}
+const MCU_PHASE_COLORS={'Phase 1':'#e5b25d','Phase 2':'#d98d3a','Phase 3':'#e05b5b','Phase 4':'#7b6ce0','Phase 5':'#4a9fe0','Phase 6':'#1a9c5b','Other Universes':'#c76bb0','Announced':'#8888aa'};
+
+// A phase's display order: the user's manual arrangement if they've moved things,
+// otherwise chronological by release date.
+function orderPhaseItems(list,phase,listOrder){
+  const byDate=[...list].sort((a,b)=>{
+    const da=parseDate(a.releaseDate),db=parseDate(b.releaseDate);
+    if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
+    return da-db;
+  });
+  const manual=listOrder&&listOrder[phase];
+  if(!manual||!manual.length)return byDate;
+  const pos={};manual.forEach((id,i)=>{pos[id]=i;});
+  const placed=byDate.filter(i=>pos[i.id]!=null).sort((a,b)=>pos[a.id]-pos[b.id]);
+  const fresh=byDate.filter(i=>pos[i.id]==null); // added since — append in date order
+  return[...placed,...fresh];
+}
+
+function MCURow({item,isFirst,isLast,onToggleWatched,onTap,onMoveUp,onMoveDown}){
   return(
     <div className="mcu-row">
       <button className={`mcu-check${item.watched?' on':''}`} onClick={e=>{e.stopPropagation();onToggleWatched(item.id);}}>
         {item.watched?'✓':''}
       </button>
-      <div className="mcu-thumb mcu-thumb-ph" style={{display:'none'}}/>
       {item.poster
         ?<img className="mcu-thumb" src={item.poster} alt={item.title} loading="lazy" onClick={()=>onTap(item)}/>
         :<div className="mcu-thumb mcu-thumb-ph" onClick={()=>onTap(item)}>🎬</div>
@@ -1356,43 +1501,52 @@ function MCURow({item,onToggleWatched,onTap}){
           {mcuSeasonLabel(item)&&<span className="mcu-season">{mcuSeasonLabel(item)}</span>}
         </div>
       </div>
+      <div className="mcu-arrows">
+        <button className="mcu-arrow" onClick={e=>{e.stopPropagation();onMoveUp();}} disabled={isFirst}>▲</button>
+        <button className="mcu-arrow" onClick={e=>{e.stopPropagation();onMoveDown();}} disabled={isLast}>▼</button>
+      </div>
     </div>
   );
 }
 
-function MCUPhaseSection({phase,items,onToggleWatched,onTap}){
+function MCUPhaseSection({phase,items,manual,onToggleWatched,onTap,onMove,onReset}){
   const[open,setOpen]=useState(phase!=='Rumored'&&phase!=='Announced'?true:false);
   const watched=items.filter(i=>i.watched).length;
   return(
     <div style={{marginBottom:4}}>
-      <button className="mcu-phase-hdr" onClick={()=>setOpen(v=>!v)}>
+      <div className="mcu-phase-hdr" onClick={()=>setOpen(v=>!v)}>
         <span style={{flex:1}}>{phase}</span>
+        {manual&&(
+          <span className="mcu-reset" title="Back to date order"
+            onClick={e=>{e.stopPropagation();onReset();}}>↺</span>
+        )}
         <span className="mcu-progress">{watched}/{items.length}</span>
         <span style={{color:'var(--text2)',fontSize:11,marginLeft:6}}>{open?'▾':'▸'}</span>
-      </button>
-      {open&&<div className="mcu-phase-items">{items.map(i=><MCURow key={i.id} item={i} onToggleWatched={onToggleWatched} onTap={onTap}/>)}</div>}
+      </div>
+      {open&&<div className="mcu-phase-items">{items.map((i,idx)=>(
+        <MCURow key={i.id} item={i}
+          isFirst={idx===0} isLast={idx===items.length-1}
+          onToggleWatched={onToggleWatched} onTap={onTap}
+          onMoveUp={()=>onMove(items,idx,-1)} onMoveDown={()=>onMove(items,idx,1)}/>
+      ))}</div>}
     </div>
   );
 }
 
-function MCUListView({mcuItems,onToggleWatched,onTap}){
+function MCUListView({mcuItems,listOrder,onToggleWatched,onTap,onReorderPhase,onResetPhase}){
   const byPhase={};
   MCU_PHASES.forEach(p=>{byPhase[p]=[];});
   mcuItems.forEach(i=>{if(byPhase[i.phase])byPhase[i.phase].push(i);});
-  // Order each phase chronologically by release date; undated entries fall to the end.
-  MCU_PHASES.forEach(p=>{
-    byPhase[p].sort((a,b)=>{
-      const da=parseDate(a.releaseDate),db=parseDate(b.releaseDate);
-      if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
-      return da-db;
-    });
-  });
   return(
     <div>
       {MCU_PHASES.map(phase=>{
-        const items=byPhase[phase]||[];
+        const items=orderPhaseItems(byPhase[phase]||[],phase,listOrder);
         if(!items.length)return null;
-        return<MCUPhaseSection key={phase} phase={phase} items={items} onToggleWatched={onToggleWatched} onTap={onTap}/>;
+        return<MCUPhaseSection key={phase} phase={phase} items={items}
+          manual={!!(listOrder&&listOrder[phase])}
+          onToggleWatched={onToggleWatched} onTap={onTap}
+          onMove={(ordered,idx,dir)=>onReorderPhase(phase,ordered,idx,dir)}
+          onReset={()=>onResetPhase(phase)}/>;
       })}
     </div>
   );
@@ -1432,16 +1586,23 @@ function MCURankRow({item,rank,total,isFirst,isLast,onMoveUp,onMoveDown,onMoveTo
   );
 }
 
+// Only watched titles are ranked, so unseen/upcoming entries can't skew the stats.
+function rankedWatched(mcuItems,ranking){
+  const byId={};mcuItems.forEach(i=>{byId[i.id]=i;});
+  return ranking.map(id=>byId[id]).filter(i=>i&&i.watched);
+}
+
 function MCURankingsView({mcuItems,ranking,onRankChange,onTap}){
-  const byId={};
-  mcuItems.forEach(i=>{byId[i.id]=i;});
-  const ranked=ranking.map(id=>byId[id]).filter(Boolean);
+  const ranked=rankedWatched(mcuItems,ranking);
   const reorder=(fromIdx,toIdx)=>{
     const ids=ranked.map(i=>i.id);
     const[id]=ids.splice(fromIdx,1);
     ids.splice(toIdx,0,id);
-    onRankChange(ids);
+    // Keep unwatched ids parked at the end so their spot returns if re-watched
+    const shown=new Set(ids);
+    onRankChange([...ids,...ranking.filter(x=>!shown.has(x))]);
   };
+  if(!ranked.length)return<div className="empty">Nothing to rank yet — check titles off as Watched in the List.</div>;
   return(
     <div>
       {ranked.map((item,idx)=>(
@@ -1452,6 +1613,216 @@ function MCURankingsView({mcuItems,ranking,onRankChange,onTap}){
           onMoveTo={n=>reorder(idx,Math.max(0,Math.min(ranked.length-1,n-1)))}
           onTap={onTap}/>
       ))}
+    </div>
+  );
+}
+
+function StatBar({label,count,avgRank,total,color}){
+  // Lower avg rank = better, so invert it for the bar width
+  const pct=total>1?((total-avgRank)/(total-1))*100:100;
+  return(
+    <div className="st-bar">
+      <div className="st-bar-top">
+        <span className="st-bar-lab">{label}</span>
+        <span className="st-bar-cnt">{count}</span>
+        <span className="st-bar-val">avg #{avgRank.toFixed(1)}</span>
+      </div>
+      <div className="st-bar-track"><div className="st-bar-fill" style={{width:`${pct}%`,background:color||'var(--accent)'}}/></div>
+    </div>
+  );
+}
+
+function StatRow({item,onTap}){
+  return(
+    <div className="st-row" onClick={()=>onTap(item)}>
+      <span className="st-row-rank">{item.rank}</span>
+      {item.poster
+        ?<img className="mcu-thumb" src={item.poster} alt="" loading="lazy"/>
+        :<div className="mcu-thumb mcu-thumb-ph">🎬</div>}
+      <div className="st-row-info">
+        <div className="st-row-title">{mcuBaseTitle(item.title)}</div>
+        <div className="st-row-sub">{[item.phase,mcuYear(item)].filter(Boolean).join(' · ')}</div>
+      </div>
+    </div>
+  );
+}
+
+function MCUStatsView({mcuItems,ranking,onTap}){
+  const[sel,setSel]=useState(null);
+  const ranked=rankedWatched(mcuItems,ranking).map((it,idx)=>({...it,rank:idx+1}));
+  const N=ranked.length;
+  if(!N)return<div className="empty">No stats yet — check titles off as Watched in the List to rank them.</div>;
+
+  const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
+  const avgRankOf=list=>avg(list.map(i=>i.rank));
+
+  /* ── Chart geometry ── */
+  const pts=ranked.map(i=>({it:i,t:mcuTime(i)})).filter(p=>p.t!=null).sort((a,b)=>a.t-b.t);
+  const W=1000,H=600,padL=52,padR=20,padT=20,padB=50;
+  const tMin=pts.length?pts[0].t:0,tMax=pts.length?pts[pts.length-1].t:1;
+  const xOf=t=>padL+(tMax===tMin?0.5:(t-tMin)/(tMax-tMin))*(W-padL-padR);
+  const yOf=r=>padT+(N<=1?0.5:(r-1)/(N-1))*(H-padT-padB);
+  const path=pts.map((p,i)=>`${i?'L':'M'}${xOf(p.t).toFixed(1)} ${yOf(p.it.rank).toFixed(1)}`).join(' ');
+
+  const yr0=pts.length?mcuYear(pts[0].it):null,yr1=pts.length?mcuYear(pts[pts.length-1].it):null;
+  const yearTicks=[];
+  if(yr0&&yr1){
+    const stepY=Math.max(1,Math.ceil(((yr1-yr0)||1)/7));
+    for(let y=yr0;y<=yr1;y+=stepY)yearTicks.push(y);
+  }
+  const rankTicks=[];
+  [0,0.25,0.5,0.75,1].forEach(f=>{const r=Math.round(1+f*(N-1));if(!rankTicks.includes(r))rankTicks.push(r);});
+  const phasesUsed=MCU_PHASES.filter(p=>p!=='Rumored'&&pts.some(x=>x.it.phase===p));
+
+  /* ── Aggregates ── */
+  const movies=ranked.filter(i=>i.type==='movie'),series=ranked.filter(i=>i.type==='tv');
+  const years=ranked.map(mcuYear).filter(Boolean);
+
+  const phaseStats=MCU_PHASES.filter(p=>p!=='Rumored').map(p=>{
+    const list=ranked.filter(i=>i.phase===p);
+    return list.length?{key:p,count:list.length,avgRank:avgRankOf(list)}:null;
+  }).filter(Boolean).sort((a,b)=>a.avgRank-b.avgRank);
+
+  const sagas=[
+    {key:'Infinity Saga',phases:['Phase 1','Phase 2','Phase 3'],color:'#e5b25d'},
+    {key:'Multiverse Saga',phases:['Phase 4','Phase 5','Phase 6'],color:'#7b6ce0'},
+  ].map(s=>{
+    const list=ranked.filter(i=>s.phases.includes(i.phase));
+    return list.length?{...s,count:list.length,avgRank:avgRankOf(list)}:null;
+  }).filter(Boolean).sort((a,b)=>a.avgRank-b.avgRank);
+
+  const yearMap={};
+  ranked.forEach(i=>{const y=mcuYear(i);if(y)(yearMap[y]=yearMap[y]||[]).push(i);});
+  const yearStats=Object.keys(yearMap).map(y=>({key:y,count:yearMap[y].length,avgRank:avgRankOf(yearMap[y])}))
+    .sort((a,b)=>a.avgRank-b.avgRank);
+
+  const charMap={};
+  ranked.forEach(i=>mcuChars(i).forEach(c=>{(charMap[c]=charMap[c]||[]).push(i);}));
+  const charAll=Object.keys(charMap).map(c=>({key:c,count:charMap[c].length,avgRank:avgRankOf(charMap[c])}));
+  const charBest=charAll.filter(c=>c.count>=2).sort((a,b)=>a.avgRank-b.avgRank).slice(0,8);
+  const charMost=[...charAll].sort((a,b)=>b.count-a.count||a.avgRank-b.avgRank).slice(0,8);
+
+  const topTen=ranked.slice(0,10);
+  const topTenYears=topTen.map(mcuYear).filter(Boolean);
+
+  return(
+    <div>
+      {/* Overview */}
+      <div className="st-grid">
+        <div className="st-card">
+          <div className="st-val">{N}</div>
+          <div className="st-lab">Titles ranked</div>
+          <div className="st-sub">{movies.length} movies · {series.length} series</div>
+        </div>
+        <div className="st-card">
+          <div className="st-val" style={{fontSize:phaseStats.length&&phaseStats[0].key.length>9?16:21}}>
+            {phaseStats.length?phaseStats[0].key:'—'}
+          </div>
+          <div className="st-lab">Favourite phase</div>
+          <div className="st-sub">{phaseStats.length?`avg #${phaseStats[0].avgRank.toFixed(1)} · ${phaseStats[0].count} titles`:''}</div>
+        </div>
+        <div className="st-card">
+          <div className="st-val">{years.length?`${Math.min(...years)}–${Math.max(...years)}`:'—'}</div>
+          <div className="st-lab">Years covered</div>
+          <div className="st-sub">{yearStats.length} release years</div>
+        </div>
+        <div className="st-card">
+          <div className="st-val">{topTenYears.length?Math.round(avg(topTenYears)):'—'}</div>
+          <div className="st-lab">Avg year of top 10</div>
+          <div className="st-sub">your golden era</div>
+        </div>
+      </div>
+
+      {/* Rank over time */}
+      <div className="st-sec">
+        <div className="st-sec-title">Rankings over time</div>
+        <div className="st-chart">
+          <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',height:'auto',display:'block'}}>
+            {rankTicks.map(r=>(
+              <g key={`r${r}`}>
+                <line x1={padL} y1={yOf(r)} x2={W-padR} y2={yOf(r)} stroke="rgba(255,255,255,.07)" strokeWidth="1.5"/>
+                <text x={padL-10} y={yOf(r)+7} textAnchor="end" fill="#8888aa" fontSize="21">#{r}</text>
+              </g>
+            ))}
+            {yearTicks.map(y=>{
+              const x=xOf(new Date(y,0,1).getTime());
+              if(x<padL-2||x>W-padR+2)return null;
+              return(
+                <g key={`y${y}`}>
+                  <line x1={x} y1={padT} x2={x} y2={H-padB} stroke="rgba(255,255,255,.05)" strokeWidth="1.5"/>
+                  <text x={x} y={H-padB+30} textAnchor="middle" fill="#8888aa" fontSize="21">{y}</text>
+                </g>
+              );
+            })}
+            <path d={path} fill="none" stroke="rgba(229,178,93,.45)" strokeWidth="2.5" strokeLinejoin="round"/>
+            {pts.map(p=>{
+              const on=sel&&sel.id===p.it.id;
+              return(
+                <g key={p.it.id} style={{cursor:'pointer'}} onClick={()=>setSel(p.it)}>
+                  <circle cx={xOf(p.t)} cy={yOf(p.it.rank)} r="16" fill="transparent"/>
+                  <circle cx={xOf(p.t)} cy={yOf(p.it.rank)} r={on?9:5.5}
+                    fill={MCU_PHASE_COLORS[p.it.phase]||'#e5b25d'}
+                    stroke={on?'#fff':'rgba(13,13,22,.9)'} strokeWidth={on?3:1.5}/>
+                </g>
+              );
+            })}
+          </svg>
+          <div className="st-legend">
+            {phasesUsed.map(p=>(
+              <span key={p} className="st-leg">
+                <span className="st-dot" style={{background:MCU_PHASE_COLORS[p]}}/>{p}
+              </span>
+            ))}
+          </div>
+        </div>
+        {sel?(
+          <div className="st-cap" onClick={()=>onTap(sel)}>
+            <span className="st-cap-rank">#{sel.rank}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="st-cap-title">{mcuBaseTitle(sel.title)}</div>
+              <div className="st-cap-sub">{[sel.phase,sel.releaseDate,mcuSeasonLabel(sel)].filter(Boolean).join(' · ')}</div>
+            </div>
+            <span style={{color:'var(--text2)',fontSize:16}}>›</span>
+          </div>
+        ):(
+          <div className="st-hint">Tap any point to see what it is · higher = ranked better</div>
+        )}
+      </div>
+
+      {/* Best & worst */}
+      <div className="st-sec">
+        <div className="st-sec-title">Your top 5</div>
+        {topTen.slice(0,5).map(i=><StatRow key={i.id} item={i} onTap={onTap}/>)}
+      </div>
+
+      {/* By phase */}
+      <div className="st-sec">
+        <div className="st-sec-title">By phase · best to worst</div>
+        {phaseStats.map(p=><StatBar key={p.key} label={p.key} count={p.count} avgRank={p.avgRank} total={N} color={MCU_PHASE_COLORS[p.key]}/>)}
+      </div>
+
+      {/* Saga + format */}
+      <div className="st-sec">
+        <div className="st-sec-title">By saga</div>
+        {sagas.map(s=><StatBar key={s.key} label={s.key} count={s.count} avgRank={s.avgRank} total={N} color={s.color}/>)}
+        <div className="st-sec-title" style={{marginTop:16}}>Movies vs series</div>
+        {movies.length>0&&<StatBar label="Movies" count={movies.length} avgRank={avgRankOf(movies)} total={N}/>}
+        {series.length>0&&<StatBar label="Series" count={series.length} avgRank={avgRankOf(series)} total={N} color="#7b6ce0"/>}
+      </div>
+
+      {/* Years */}
+      <div className="st-sec">
+        <div className="st-sec-title">Strongest years</div>
+        {yearStats.slice(0,6).map(y=><StatBar key={y.key} label={y.key} count={y.count} avgRank={y.avgRank} total={N}/>)}
+      </div>
+
+      {/* Characters */}
+      <div className="st-sec">
+        <div className="st-sec-title">Best-ranked heroes · 2+ appearances</div>
+        {charBest.map(c=><StatBar key={c.key} label={c.key} count={c.count} avgRank={c.avgRank} total={N}/>)}
+        <div className="st-sec-title" style={{marginTop:16}}>Most appearances</div>
+        {charMost.map(c=><StatBar key={c.key} label={c.key} count={c.count} avgRank={c.avgRank} total={N} color="#4a9fe0"/>)}
+      </div>
     </div>
   );
 }
@@ -1521,14 +1892,14 @@ function MCUDetailModal({item,onClose,onUpdate,onRemove}){
   );
 }
 
-function SettingsModal({onClose,items,mcuItems,mcuRanking,onImport}){
+function SettingsModal({onClose,items,mcuItems,mcuRanking,mcuListOrder,onImport}){
   const[token,setToken]=useState(()=>localStorage.getItem('gist-token')||'');
   const[gistId,setGistId]=useState(()=>localStorage.getItem('gist-id')||'');
   const[status,setStatus]=useState(null);
   const[syncing,setSyncing]=useState(false);
   const fileRef=useRef(null);
 
-  const buildPayload=()=>({version:1,exportedAt:new Date().toISOString(),watchlist:items,mcuItems,mcuRanking});
+  const buildPayload=()=>({version:1,exportedAt:new Date().toISOString(),watchlist:items,mcuItems,mcuRanking,mcuListOrder});
 
   const persistSettings=(tok,gid)=>{
     if(tok!==undefined){localStorage.setItem('gist-token',tok);}
@@ -1963,6 +2334,10 @@ function App(){
     try{const s=localStorage.getItem('mcu-ranking-v1');if(s)return JSON.parse(s);}catch{}
     return MCU_DATA.filter(i=>i.phase!=='Rumored').map(i=>i.id);
   });
+  const[mcuListOrder,setMcuListOrder]=useState(()=>{
+    try{const s=localStorage.getItem('mcu-list-order-v1');if(s)return JSON.parse(s);}catch{}
+    return{};
+  });
 
   useEffect(()=>{
     try{localStorage.setItem('watchlist-v8',JSON.stringify(items));}catch{}
@@ -1973,6 +2348,9 @@ function App(){
   useEffect(()=>{
     try{localStorage.setItem('mcu-ranking-v1',JSON.stringify(mcuRanking));}catch{}
   },[mcuRanking]);
+  useEffect(()=>{
+    try{localStorage.setItem('mcu-list-order-v1',JSON.stringify(mcuListOrder));}catch{}
+  },[mcuListOrder]);
   useEffect(()=>{
     const need=mcuItems.filter(i=>!i.tmdbFetched);
     if(!need.length)return;
@@ -2048,7 +2426,22 @@ function App(){
   const addMCUItem=useCallback(item=>{
     setMcuItems(p=>[...p,item]);
     if(item.phase!=='Rumored')setMcuRanking(p=>[...p,item.id]);
+    // Pull poster/description right away rather than waiting for the next reload
+    fetchMCUItem(item).then(upd=>{
+      if(upd)setMcuItems(p=>p.map(i=>i.id===item.id?{...i,...upd}:i));
+    });
   },[]);
+  const reorderMCUPhase=useCallback((phase,ordered,idx,dir)=>{
+    const to=idx+dir;
+    if(to<0||to>=ordered.length)return;
+    const ids=ordered.map(i=>i.id);
+    const[id]=ids.splice(idx,1);
+    ids.splice(to,0,id);
+    setMcuListOrder(p=>({...p,[phase]:ids}));
+  },[]);
+  const resetMCUPhase=useCallback(phase=>setMcuListOrder(p=>{
+    const n={...p};delete n[phase];return n;
+  }),[]);
   const toggleMCUWatched=useCallback(id=>setMcuItems(p=>p.map(i=>i.id===id?{...i,watched:!i.watched}:i)),[]);
   const updateMCURanking=useCallback(r=>setMcuRanking(r),[]);
   const updateMCUItem=useCallback((id,upd)=>{
@@ -2076,6 +2469,7 @@ function App(){
       if(d.watchlist)setItems(autoMove(d.watchlist));
       if(d.mcuItems)setMcuItems(d.mcuItems);
       if(d.mcuRanking)setMcuRanking(d.mcuRanking);
+      if(d.mcuListOrder)setMcuListOrder(d.mcuListOrder);
     }
   },[]);
 
@@ -2102,7 +2496,7 @@ function App(){
   const pct=total>0?(done/total)*100:100;
   const tc=counts[tab]||{};
   const SECTIONS=tab==='mcu'
-    ?[['list','List',''],['rankings','Rankings','']]
+    ?[['list','List',''],['rankings','Rankings',''],['stats','Stats','']]
     :tab==='movie'
       ?[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]]
       :[['released','Watch',tc.released],['comingSoon','Coming Soon',tc.comingSoon],['rewatch','Rewatch',tc.rewatch],['favorites','Favorites',tc.favorites]];
@@ -2155,7 +2549,11 @@ function App(){
         {tab==='mcu'?(
           section==='rankings'
             ?<MCURankingsView mcuItems={mcuItems} ranking={mcuRanking} onRankChange={updateMCURanking} onTap={setMcuDetail}/>
-            :<MCUListView mcuItems={mcuItems} onToggleWatched={toggleMCUWatched} onTap={setMcuDetail}/>
+            :section==='stats'
+              ?<MCUStatsView mcuItems={mcuItems} ranking={mcuRanking} onTap={setMcuDetail}/>
+              :<MCUListView mcuItems={mcuItems} listOrder={mcuListOrder}
+                  onToggleWatched={toggleMCUWatched} onTap={setMcuDetail}
+                  onReorderPhase={reorderMCUPhase} onResetPhase={resetMCUPhase}/>
         ):section==='favorites'?(
           <FavoritesView items={items} tab={tab} onTap={it=>{setFavDetail(it);setDetail(null);}}/>
         ):(
@@ -2187,7 +2585,7 @@ function App(){
       )}
       {mcuDetail&&<MCUDetailModal item={mcuDetail} onClose={()=>setMcuDetail(null)} onUpdate={updateMCUItem} onRemove={removeMCUItem}/>}
       {showAdd&&<AddModal onClose={()=>setShowAdd(false)} onAdd={addItem} onAddMCU={addMCUItem}/>}
-      {showSettings&&<SettingsModal onClose={()=>setShowSettings(false)} items={items} mcuItems={mcuItems} mcuRanking={mcuRanking} onImport={importData}/>}
+      {showSettings&&<SettingsModal onClose={()=>setShowSettings(false)} items={items} mcuItems={mcuItems} mcuRanking={mcuRanking} mcuListOrder={mcuListOrder} onImport={importData}/>}
     </>
   );
 }
